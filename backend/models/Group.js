@@ -19,6 +19,10 @@ const groupSchema = new mongoose.Schema({
     contests: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Contest'
+    }],
+    problemSets: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'ProblemSet'
     }]
 }, { timestamps: true });
 

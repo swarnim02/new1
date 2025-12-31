@@ -14,6 +14,12 @@ const userSchema = new mongoose.Schema({
         trim: true,
         lowercase: true
     },
+    codeforcesHandle: {
+        type: String,
+        trim: true,
+        default: ''
+    },
+
     password: {
         type: String,
         required: true
@@ -23,22 +29,21 @@ const userSchema = new mongoose.Schema({
         enum: ['mentor', 'student'],
         default: 'student'
     },
-    groupId: {
+    groupIds: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Group',
-        default: null
-    }
+        ref: 'Group'
+    }]
 }, { timestamps: true });
 
 // Pre-save hook to hash password
-userSchema.pre('save', async function(next) {
-    if (!this.isModified('password')) return next();
+// Pre-save hook to hash password
+userSchema.pre('save', async function() {
+    if (!this.isModified('password')) return;
     try {
         const salt = await bcrypt.genSalt(10);
         this.password = await bcrypt.hash(this.password, salt);
-        next();
     } catch (err) {
-        next(err);
+        throw new Error(err);
     }
 });
 
