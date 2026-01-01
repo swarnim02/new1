@@ -10,13 +10,15 @@ const register = async (req, res) => {
     const { name, email, password, role } = req.body;
 
     try {
-        // Validate input
-        if (!name || !email || !password || !role) {
-            return res.status(400).json({ message: 'Please provide all fields' });
+        // Validate input types
+        if (!name || !email || !password || !role || 
+            typeof name !== 'string' || typeof email !== 'string' || 
+            typeof password !== 'string' || typeof role !== 'string') {
+            return res.status(400).json({ message: 'Please provide all fields with valid data types' });
         }
 
         // Check if user already exists
-        const userExists = await User.findOne({ email });
+        const userExists = await User.findOne({ email: email.toLowerCase().trim() });
         if (userExists) {
             return res.status(400).json({ message: 'User already exists' });
         }
@@ -28,24 +30,21 @@ const register = async (req, res) => {
 
         // Create user
         const user = await User.create({
-            name,
-            email,
+            name: name.trim(),
+            email: email.toLowerCase().trim(),
             password, // Will be hashed by pre-save hook
             role,
-            codeforcesHandle: req.body.codeforcesHandle || ''
+            codeforcesHandle: req.body.codeforcesHandle ? req.body.codeforcesHandle.trim() : ''
         });
 
+        generateToken(res, user._id);
 
-        if (user) {
-            generateToken(res, user._id);
-
-            res.status(201).json({
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role
-            });
-        }
+        res.status(201).json({
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role
+        });
     } catch (error) {
         console.error('Register error:', error.message);
         res.status(500).json({ message: 'Server error during registration' });

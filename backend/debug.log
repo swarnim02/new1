@@ -760,3 +760,157 @@
 [2025-12-31T12:03:11.118Z] Fetching queue for user: 695415623590f72a49bfe54b
 [2025-12-31T12:03:11.183Z] Found 29 pending records in DB
 [2025-12-31T12:03:11.183Z] Returning 29 items to frontend
+[2026-01-01T10:50:12.033Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T10:50:12.091Z] Found 0 pending records in DB
+[2026-01-01T10:50:12.097Z] Returning 0 items to frontend
+[2026-01-01T10:50:12.153Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T10:50:12.205Z] Found 0 pending records in DB
+[2026-01-01T10:50:12.206Z] Returning 0 items to frontend
+[2026-01-01T10:50:23.744Z] [BulkUpsolve] Starting strict focus sync for cosmicnexus
+[2026-01-01T10:50:28.924Z] BulkUpsolve Focused Sync finished. Added: 29, Trashed/Synced: 0
+[2026-01-01T10:50:28.985Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T10:50:29.095Z] Found 29 pending records in DB
+[2026-01-01T10:50:29.096Z] Returning 29 items to frontend
+[2026-01-01T10:50:34.370Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T10:50:34.460Z] Found 29 pending records in DB
+[2026-01-01T10:50:34.461Z] Returning 29 items to frontend
+[2026-01-01T10:58:05.580Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T10:58:05.767Z] Found 29 pending records in DB
+[2026-01-01T10:58:05.767Z] Returning 29 items to frontend
+[2026-01-01T10:58:05.813Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T10:58:05.925Z] Found 29 pending records in DB
+[2026-01-01T10:58:05.927Z] Returning 29 items to frontend
+[2026-01-01T10:58:15.130Z] [BulkUpsolve] Starting strict focus sync for cosmicnexus
+[2026-01-01T10:58:16.410Z] BulkUpsolve Focused Sync finished. Added: 0, Trashed/Synced: 0
+[2026-01-01T10:58:16.461Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T10:58:16.562Z] Found 29 pending records in DB
+[2026-01-01T10:58:16.563Z] Returning 29 items to frontend
+[2026-01-01T10:58:34.397Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T10:58:34.507Z] Found 29 pending records in DB
+[2026-01-01T10:58:34.508Z] Returning 29 items to frontend
+[2026-01-01T10:58:37.574Z] [BulkUpsolve] Starting strict focus sync for cosmicnexus
+[2026-01-01T10:58:40.820Z] BulkUpsolve Focused Sync finished. Added: 0, Trashed/Synced: 0
+[2026-01-01T10:58:40.899Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T10:58:41.018Z] Found 29 pending records in DB
+[2026-01-01T10:58:41.020Z] Returning 29 items to frontend
+[2026-01-01T11:02:06.195Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T11:02:06.304Z] Found 29 pending records in DB
+[2026-01-01T11:02:06.305Z] Returning 29 items to frontend
+[2026-01-01T11:02:06.358Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T11:02:06.463Z] Found 29 pending records in DB
+[2026-01-01T11:02:06.463Z] Returning 29 items to frontend
+[2026-01-01T11:09:54.072Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T11:09:54.180Z] Found 29 pending records in DB
+[2026-01-01T11:09:54.180Z] Returning 29 items to frontend
+[2026-01-01T11:09:54.231Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T11:09:54.340Z] Found 29 pending records in DB
+[2026-01-01T11:09:54.340Z] Returning 29 items to frontend
+[2026-01-01T11:09:57.630Z] [BulkUpsolve] Starting strict focus sync for cosmicnexus
+[2026-01-01T11:10:03.576Z] BulkUpsolve Focused Sync finished. Added: 0, Trashed/Synced: 0
+[2026-01-01T11:10:03.632Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T11:10:03.744Z] Found 29 pending records in DB
+[2026-01-01T11:10:03.745Z] Returning 29 items to frontend
+[2026-01-01T11:18:06.362Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T11:18:06.471Z] Found 29 pending records in DB
+[2026-01-01T11:18:06.472Z] Returning 29 items to frontend
+[2026-01-01T11:18:06.520Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T11:18:06.625Z] Found 29 pending records in DB
+[2026-01-01T11:18:06.625Z] Returning 29 items to frontend
+[2026-01-01T11:20:41.274Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T11:20:41.380Z] Found 29 pending records in DB
+[2026-01-01T11:20:41.380Z] Returning 29 items to frontend
+[2026-01-01T11:20:45.415Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T11:20:45.527Z] Found 29 pending records in DB
+[2026-01-01T11:20:45.535Z] Returning 29 items to frontend
+[2026-01-01T11:20:45.594Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T11:20:45.711Z] Found 29 pending records in DB
+[2026-01-01T11:20:45.714Z] Returning 29 items to frontend
+[2026-01-01T11:22:25.579Z] [BulkUpsolve] Starting strict focus sync for cosmicnexus
+[2026-01-01T11:22:27.457Z] BulkUpsolve Focused Sync finished. Added: 0, Trashed/Synced: 0
+[2026-01-01T11:22:27.520Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T11:22:27.629Z] Found 29 pending records in DB
+[2026-01-01T11:22:27.630Z] Returning 29 items to frontend
+[2026-01-01T11:48:36.551Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T11:48:36.669Z] Found 29 pending records in DB
+[2026-01-01T11:48:36.670Z] Returning 29 items to frontend
+[2026-01-01T11:48:36.721Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T11:48:36.829Z] Found 29 pending records in DB
+[2026-01-01T11:48:36.830Z] Returning 29 items to frontend
+[2026-01-01T11:48:39.017Z] [BulkUpsolve] Starting strict focus sync for cosmicnexus
+[2026-01-01T11:48:40.247Z] BulkUpsolve Focused Sync finished. Added: 0, Trashed/Synced: 0
+[2026-01-01T11:48:40.304Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T11:48:40.408Z] Found 29 pending records in DB
+[2026-01-01T11:48:40.409Z] Returning 29 items to frontend
+[2026-01-01T11:51:47.347Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T11:51:47.471Z] Found 29 pending records in DB
+[2026-01-01T11:51:47.471Z] Returning 29 items to frontend
+[2026-01-01T11:51:47.522Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T11:51:47.636Z] Found 29 pending records in DB
+[2026-01-01T11:51:47.636Z] Returning 29 items to frontend
+[2026-01-01T11:51:54.188Z] [BulkUpsolve] Starting strict focus sync for cosmicnexus
+[2026-01-01T11:51:56.449Z] BulkUpsolve Focused Sync finished. Added: 0, Trashed/Synced: 0
+[2026-01-01T11:51:56.516Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T11:51:56.653Z] Found 29 pending records in DB
+[2026-01-01T11:51:56.653Z] Returning 29 items to frontend
+[2026-01-01T11:52:48.185Z] [BulkUpsolve] Starting strict focus sync for cosmicnexus
+[2026-01-01T11:52:49.616Z] BulkUpsolve Focused Sync finished. Added: 0, Trashed/Synced: 0
+[2026-01-01T11:52:49.687Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T11:52:49.810Z] Found 29 pending records in DB
+[2026-01-01T11:52:49.810Z] Returning 29 items to frontend
+[2026-01-01T11:54:28.902Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T11:54:29.017Z] Found 29 pending records in DB
+[2026-01-01T11:54:29.019Z] Returning 29 items to frontend
+[2026-01-01T11:54:29.071Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T11:54:29.187Z] Found 29 pending records in DB
+[2026-01-01T11:54:29.187Z] Returning 29 items to frontend
+[2026-01-01T11:56:59.273Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T11:56:59.383Z] Found 29 pending records in DB
+[2026-01-01T11:56:59.384Z] Returning 29 items to frontend
+[2026-01-01T12:08:48.379Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T12:08:48.493Z] Found 29 pending records in DB
+[2026-01-01T12:08:48.494Z] Returning 29 items to frontend
+[2026-01-01T12:08:48.551Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T12:08:48.660Z] Found 29 pending records in DB
+[2026-01-01T12:08:48.661Z] Returning 29 items to frontend
+[2026-01-01T12:08:49.842Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T12:08:49.967Z] Found 29 pending records in DB
+[2026-01-01T12:08:49.968Z] Returning 29 items to frontend
+[2026-01-01T12:08:50.021Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T12:08:50.137Z] Found 29 pending records in DB
+[2026-01-01T12:08:50.137Z] Returning 29 items to frontend
+[2026-01-01T12:08:51.112Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T12:08:51.216Z] Found 29 pending records in DB
+[2026-01-01T12:08:51.216Z] Returning 29 items to frontend
+[2026-01-01T12:08:51.271Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T12:08:51.381Z] Found 29 pending records in DB
+[2026-01-01T12:08:51.382Z] Returning 29 items to frontend
+[2026-01-01T12:08:52.554Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T12:08:52.666Z] Found 29 pending records in DB
+[2026-01-01T12:08:52.668Z] Returning 29 items to frontend
+[2026-01-01T12:08:52.720Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T12:08:52.829Z] Found 29 pending records in DB
+[2026-01-01T12:08:52.846Z] Returning 29 items to frontend
+[2026-01-01T12:08:54.062Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T12:08:54.163Z] Found 29 pending records in DB
+[2026-01-01T12:08:54.164Z] Returning 29 items to frontend
+[2026-01-01T12:08:54.216Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T12:08:54.317Z] Found 29 pending records in DB
+[2026-01-01T12:08:54.320Z] Returning 29 items to frontend
+[2026-01-01T12:08:55.446Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T12:08:55.564Z] Found 29 pending records in DB
+[2026-01-01T12:08:55.565Z] Returning 29 items to frontend
+[2026-01-01T12:08:55.620Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T12:08:55.731Z] Found 29 pending records in DB
+[2026-01-01T12:08:55.732Z] Returning 29 items to frontend
+[2026-01-01T12:09:00.560Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T12:09:00.667Z] Found 29 pending records in DB
+[2026-01-01T12:09:00.667Z] Returning 29 items to frontend
+[2026-01-01T12:09:00.720Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T12:09:00.831Z] Found 29 pending records in DB
+[2026-01-01T12:09:00.832Z] Returning 29 items to frontend
+[2026-01-01T12:09:02.385Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T12:09:02.496Z] Found 29 pending records in DB
+[2026-01-01T12:09:02.497Z] Returning 29 items to frontend
+[2026-01-01T12:09:02.551Z] Fetching queue for user: 69565163cd649584d42f5ea4
+[2026-01-01T12:09:02.661Z] Found 29 pending records in DB
+[2026-01-01T12:09:02.661Z] Returning 29 items to frontend

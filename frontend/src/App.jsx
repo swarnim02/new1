@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import MainHome from './pages/MainHome';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -14,7 +15,8 @@ function App() {
       <Router>
         <div className="app">
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<MainHome />} />
+            <Route path="/cp-helper" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 

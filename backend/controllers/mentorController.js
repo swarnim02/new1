@@ -48,7 +48,7 @@ const createGroup = async (req, res) => {
 const getMyGroups = async (req, res) => {
     try {
         const groups = await Group.find({ mentorId: req.user._id })
-            .populate('students', 'name email')
+            .populate('students', 'name email codeforcesHandle')
             .populate('contests');
 
         res.status(200).json(groups);
@@ -399,7 +399,7 @@ const getGroupStats = async (req, res) => {
     const { groupId } = req.params;
 
     try {
-        const group = await Group.findById(groupId).populate('students', 'name email');
+        const group = await Group.findById(groupId).populate('students', 'name email codeforcesHandle');
         if (!group) return res.status(404).json({ message: 'Group not found' });
 
         if (group.mentorId.toString() !== req.user._id.toString()) {

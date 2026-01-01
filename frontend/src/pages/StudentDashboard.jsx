@@ -19,6 +19,8 @@ const StudentDashboard = () => {
     const [activeTab, setActiveTab] = useState('queue');
     const [customContestId, setCustomContestId] = useState('');
     const [studentGroups, setStudentGroups] = useState([]); // Array of { groupId, groupName, problems }
+    const [selectedGroup, setSelectedGroup] = useState(null);
+    const [selectedSet, setSelectedSet] = useState(null);
     const [solveModal, setSolveModal] = useState({ show: false, problem: null, timeTaken: '<20min', learnings: '' });
 
     useEffect(() => {
@@ -166,7 +168,7 @@ const StudentDashboard = () => {
     return (
         <div className="dashboard-container">
             <nav className="dashboard-nav">
-                <h2>🚀 Algonauts - Student {studentGroups.length > 0 && <span style={{ fontSize: '1rem', color: '#aaa', marginLeft: '10px' }}>({studentGroups.length} Groups)</span>}</h2>
+                <h2>Algonauts - Student {studentGroups.length > 0 && <span style={{ fontSize: '1rem', color: '#aaa', marginLeft: '10px' }}>({studentGroups.length} Groups)</span>}</h2>
                 <div className="nav-user">
                     <span>{user?.name}</span>
                     <button onClick={handleRefresh} className="btn btn-secondary" style={{ marginRight: '10px' }}>Refresh</button>
@@ -200,7 +202,7 @@ const StudentDashboard = () => {
                     {activeTab === 'queue' && (
                         <div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                                <h2>📝 Your Upsolve Queue</h2>
+                                <h2>Your Upsolve Queue</h2>
                                 <div style={{ display: 'flex', gap: '10px' }}>
                                     <button
                                         id="fetch-status-btn"
@@ -208,22 +210,43 @@ const StudentDashboard = () => {
                                         onClick={handleFetchStatus}
                                         style={{ background: 'var(--primary)' }}
                                     >
-                                        Fetch Current Status 🔄
+                                        Fetch Current Status
                                     </button>
                                 </div>
                             </div>
 
                             {/* Precise Upsolve Stats */}
                             <div className="stats-grid" style={{ marginBottom: '20px', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px' }}>
-                                <div className="stat-card" style={{ padding: '15px', textAlign: 'center' }}>
+                                <div className="stat-card" style={{ 
+                                    padding: '15px', 
+                                    textAlign: 'center',
+                                    background: 'rgba(255, 255, 255, 0.1)',
+                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                    borderRadius: '8px',
+                                    backdropFilter: 'blur(10px)'
+                                }}>
                                     <h4 style={{ fontSize: '0.8rem', color: '#aaa', margin: '0' }}>Contests Given</h4>
-                                    <p style={{ fontSize: '1.5rem', fontWeight: 'bold', margin: '5px 0' }}>{upsolveStats.contestGiven}</p>
+                                    <p style={{ fontSize: '1.5rem', fontWeight: 'bold', margin: '5px 0', color: 'white' }}>{upsolveStats.contestGiven}</p>
                                 </div>
-                                <div className="stat-card" style={{ padding: '15px', textAlign: 'center', borderTop: '3px solid #2ecc71' }}>
+                                <div className="stat-card" style={{ 
+                                    padding: '15px', 
+                                    textAlign: 'center', 
+                                    background: 'rgba(46, 204, 113, 0.2)',
+                                    border: '1px solid rgba(46, 204, 113, 0.5)',
+                                    borderRadius: '8px',
+                                    backdropFilter: 'blur(10px)'
+                                }}>
                                     <h4 style={{ fontSize: '0.8rem', color: '#aaa', margin: '0' }}>Upsolve Done</h4>
                                     <p style={{ fontSize: '1.5rem', fontWeight: 'bold', margin: '5px 0', color: '#2ecc71' }}>{upsolveStats.upsolveDone}</p>
                                 </div>
-                                <div className="stat-card" style={{ padding: '15px', textAlign: 'center', borderTop: '3px solid #e67e22' }}>
+                                <div className="stat-card" style={{ 
+                                    padding: '15px', 
+                                    textAlign: 'center', 
+                                    background: 'rgba(230, 126, 34, 0.2)',
+                                    border: '1px solid rgba(230, 126, 34, 0.5)',
+                                    borderRadius: '8px',
+                                    backdropFilter: 'blur(10px)'
+                                }}>
                                     <h4 style={{ fontSize: '0.8rem', color: '#aaa', margin: '0' }}>Upsolve Pending</h4>
                                     <p style={{ fontSize: '1.5rem', fontWeight: 'bold', margin: '5px 0', color: '#e67e22' }}>{upsolveStats.upsolvePending}</p>
                                 </div>
@@ -244,7 +267,7 @@ const StudentDashboard = () => {
 
                             {upsolveQueue.length === 0 ? (
                                 <div className="empty-state">
-                                    <h3>🎉 All caught up!</h3>
+                                    <h3>All caught up!</h3>
                                     <p>No pending problems in your queue. Click "Auto-Fill" to find new challenges.</p>
                                 </div>
                             ) : (
@@ -281,7 +304,7 @@ const StudentDashboard = () => {
                     {activeTab === 'groups' && (
                         <div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                                <h2>👥 Collaborative Groups</h2>
+                                <h2>Collaborative Groups</h2>
                                 <span className="status-badge" style={{ background: studentGroups.length > 0 ? 'var(--primary)' : '#e74c3c', padding: '5px 15px' }}>
                                     {studentGroups.length} {studentGroups.length === 1 ? 'Group' : 'Groups'} assigned
                                 </span>
@@ -294,67 +317,132 @@ const StudentDashboard = () => {
                                     <p style={{ color: '#666' }}>Ask your mentor to add your email ({user?.email}) to a group.</p>
                                 </div>
                             ) : (
-                                studentGroups.map(group => (
-                                    <div key={group.groupId} className="group-section" style={{ marginBottom: '3rem', background: 'rgba(255,255,255,0.02)', padding: '20px', borderRadius: '15px' }}>
-                                        <h3 style={{ borderBottom: '1px solid #333', paddingBottom: '10px', marginBottom: '20px', color: 'var(--primary)' }}>
-                                            Group: {group.groupName}
-                                        </h3>
+                                <div>
+                                    {!selectedGroup ? (
+                                        <div className="groups-list">
+                                            {studentGroups.map(group => (
+                                                <div 
+                                                    key={group.groupId} 
+                                                    className="queue-item" 
+                                                    style={{ cursor: 'pointer', marginBottom: '1rem' }}
+                                                    onClick={() => setSelectedGroup(group)}
+                                                >
+                                                    <h3 style={{ margin: 0, color: '#007bff' }}>{group.groupName}</h3>
+                                                    <p style={{ margin: '0.5rem 0 0 0', color: '#666' }}>
+                                                        {group.sets.length} problem sets
+                                                    </p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : !selectedSet ? (
+                                        <div>
+                                            <div style={{ marginBottom: '2rem' }}>
+                                                <button 
+                                                    className="btn btn-secondary btn-sm" 
+                                                    onClick={() => setSelectedGroup(null)}
+                                                    style={{ marginBottom: '1rem' }}
+                                                >
+                                                    ← Back to Groups
+                                                </button>
+                                                <h3 style={{ color: '#007bff' }}>Group: {selectedGroup.groupName}</h3>
+                                            </div>
 
-                                        {group.sets.length === 0 ? (
-                                            <p style={{ color: '#666', fontStyle: 'italic' }}>No problem sets assigned yet in this group.</p>
-                                        ) : (
-                                            group.sets.map(set => (
-                                                <div key={set.setId} className="set-section" style={{ marginBottom: '2rem' }}>
-                                                    <h4 style={{ color: '#aaa', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                        <span style={{ color: 'var(--primary)' }}>#</span> {set.setName}
-                                                    </h4>
+                                            {selectedGroup.sets.length === 0 ? (
+                                                <p style={{ color: '#666', fontStyle: 'italic' }}>No problem sets assigned yet in this group.</p>
+                                            ) : (
+                                                <div className="sets-list">
+                                                    {selectedGroup.sets.map(set => (
+                                                        <div 
+                                                            key={set.setId} 
+                                                            className="queue-item" 
+                                                            style={{ cursor: 'pointer', marginBottom: '1rem' }}
+                                                            onClick={() => setSelectedSet(set)}
+                                                        >
+                                                            <h4 style={{ margin: 0, color: '#007bff' }}>{set.setName}</h4>
+                                                            <p style={{ margin: '0.5rem 0 0 0', color: '#666' }}>
+                                                                {set.problems.length} problems
+                                                            </p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <div style={{ marginBottom: '2rem' }}>
+                                                <button 
+                                                    className="btn btn-secondary btn-sm" 
+                                                    onClick={() => setSelectedSet(null)}
+                                                    style={{ marginBottom: '1rem' }}
+                                                >
+                                                    ← Back to Sets
+                                                </button>
+                                                <h4 style={{ color: '#007bff' }}>{selectedSet.setName}</h4>
+                                            </div>
 
-                                                    <div className="queue-list">
-                                                        {set.problems.map(problem => (
-                                                            <div key={problem._id} className={`queue-item animate-fade-in ${problem.status === 'Solved' ? 'solved' : ''}`}>
-                                                                <div className="problem-info">
-                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                                        <span className="platform-tag">{problem.platform}</span>
-                                                                        <span className="problem-title">{problem.title}</span>
+                                            <div style={{ 
+                                                background: 'rgba(255, 255, 255, 0.1)',
+                                                border: '1px solid rgba(255, 255, 255, 0.2)',
+                                                borderRadius: '8px',
+                                                backdropFilter: 'blur(10px)',
+                                                overflow: 'hidden'
+                                            }}>
+                                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                                    <thead>
+                                                        <tr style={{ background: 'rgba(0, 0, 0, 0.3)' }}>
+                                                            <th style={{ padding: '1rem', textAlign: 'left', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Problem</th>
+                                                            <th style={{ padding: '1rem', textAlign: 'center', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Platform</th>
+                                                            <th style={{ padding: '1rem', textAlign: 'center', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Status</th>
+                                                            <th style={{ padding: '1rem', textAlign: 'center', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {selectedSet.problems.map(problem => (
+                                                            <tr key={problem._id} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                                                                <td style={{ padding: '1rem', color: 'white' }}>
+                                                                    <div>
+                                                                        <div style={{ fontWeight: 'bold' }}>{problem.title}</div>
+                                                                        {problem.status === 'Solved' && (
+                                                                            <div style={{ fontSize: '0.8rem', color: '#aaa', marginTop: '5px' }}>
+                                                                                Time: {problem.timeTaken} | {new Date(problem.solvedAt).toLocaleDateString()}
+                                                                                {problem.learnings && <div style={{ color: '#ddd' }}>Learnings: {problem.learnings}</div>}
+                                                                            </div>
+                                                                        )}
                                                                     </div>
-                                                                    <div className="problem-actions">
+                                                                </td>
+                                                                <td style={{ padding: '1rem', textAlign: 'center', color: '#e67e22', fontWeight: 'bold' }}>{problem.platform}</td>
+                                                                <td style={{ padding: '1rem', textAlign: 'center' }}>
+                                                                    {problem.status === 'Solved' ? (
+                                                                        <span className="status-badge solved" style={{ color: '#2ecc71', fontWeight: 'bold' }}>Solved</span>
+                                                                    ) : (
+                                                                        <span style={{ color: '#e67e22', fontWeight: 'bold' }}>Pending</span>
+                                                                    )}
+                                                                </td>
+                                                                <td style={{ padding: '1rem', textAlign: 'center' }}>
+                                                                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
                                                                         <a href={problem.link} target="_blank" rel="noopener noreferrer" className="btn btn-secondary btn-sm">View</a>
-                                                                        {problem.status !== 'Solved' ? (
+                                                                        {problem.status !== 'Solved' && (
                                                                             <button className="btn btn-primary btn-sm" onClick={() => setSolveModal({ show: true, problem, timeTaken: '<20min', learnings: '' })}>
                                                                                 Mark Solved
                                                                             </button>
-                                                                        ) : (
-                                                                            <span className="status-badge solved">✅ Solved</span>
                                                                         )}
                                                                     </div>
-                                                                </div>
-                                                                {problem.status === 'Solved' && (
-                                                                    <div className="solve-details" style={{ marginTop: '10px', padding: '10px', background: 'rgba(255,255,255,0.03)', borderRadius: '5px', fontSize: '0.85rem' }}>
-                                                                        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#aaa' }}>
-                                                                            <span>Time: {problem.timeTaken}</span>
-                                                                            <span>{new Date(problem.solvedAt).toLocaleDateString()}</span>
-                                                                        </div>
-                                                                        {problem.learnings && (
-                                                                            <p style={{ marginTop: '5px', color: '#ddd' }}><strong>Learnings:</strong> {problem.learnings}</p>
-                                                                        )}
-                                                                    </div>
-                                                                )}
-                                                            </div>
+                                                                </td>
+                                                            </tr>
                                                         ))}
-                                                        {set.problems.length === 0 && <p style={{ fontSize: '0.8rem', color: '#444', fontStyle: 'italic' }}>No problems in this set.</p>}
-                                                    </div>
-                                                </div>
-                                            ))
-                                        )}
-                                    </div>
-                                ))
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             )}
                         </div>
                     )}
 
                     {activeTab === 'stats' && (
                         <div>
-                            <h2>📊 Your Statistics</h2>
+                            <h2>Your Statistics</h2>
                             {stats && (
                                 <div className="stats-grid">
                                     <div className="stat-card">
@@ -394,10 +482,10 @@ const StudentDashboard = () => {
                                     onChange={e => setSolveModal({ ...solveModal, timeTaken: e.target.value })}
                                     style={{ width: '100%', padding: '10px', background: '#222', color: '#fff', border: '1px solid #444', borderRadius: '5px' }}
                                 >
-                                    <option value="<20min">&lt; 20 minutes (🚀 Godspeed)</option>
-                                    <option value="<30min">&lt; 30 minutes (⚡ Fast)</option>
-                                    <option value="<1hour">&lt; 1 hour (⏱️ Average)</option>
-                                    <option value="<3hour">&lt; 3 hours (🐢 Slow & Steady)</option>
+                                    <option value="<20min">&lt; 20 minutes (Godspeed)</option>
+                                    <option value="<30min">&lt; 30 minutes (Fast)</option>
+                                    <option value="<1hour">&lt; 1 hour (Average)</option>
+                                    <option value="<3hour">&lt; 3 hours (Slow & Steady)</option>
                                 </select>
                             </div>
                             <div className="form-group" style={{ marginTop: '20px' }}>
