@@ -66,7 +66,7 @@ const login = async (req, res) => {
         }
 
         // Check if user exists
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email: email.toLowerCase().trim() });
         if (!user) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }

@@ -12,21 +12,16 @@ const MentorDashboard = () => {
     const [problemSets, setProblemSets] = useState([]);
     const [selectedSet, setSelectedSet] = useState(null);
     const [activeSection, setActiveSection] = useState('main');
-    const [selectedPerformanceGroup, setSelectedPerformanceGroup] = useState(null);
     const [fetchingStats, setFetchingStats] = useState(false);
-
-    // UI States
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [showAddGroup, setShowAddGroup] = useState(false);
     const [showAddSet, setShowAddSet] = useState(false);
     const [showAddStudent, setShowAddStudent] = useState(false);
     const [showAddProblem, setShowAddProblem] = useState(false);
-
-    // Form states
     const [newGroupName, setNewGroupName] = useState('');
     const [newSetName, setNewSetName] = useState('');
     const [studentEmails, setStudentEmails] = useState('');
     const [problemForm, setProblemForm] = useState({ title: '', link: '', platform: 'Codeforces' });
-    const [groupStats, setGroupStats] = useState(null);
 
     useEffect(() => {
         fetchGroups();
@@ -57,15 +52,6 @@ const MentorDashboard = () => {
             }
         } catch (error) {
             console.error('Error fetching sets:', error);
-        }
-    };
-
-    const fetchStats = async (groupId) => {
-        try {
-            const response = await mentorAPI.getGroupStats(groupId);
-            setGroupStats(response.data);
-        } catch (error) {
-            console.error('Error fetching stats:', error);
         }
     };
 
@@ -160,15 +146,85 @@ const MentorDashboard = () => {
         navigate('/login');
     };
 
+    const handleLogoClick = () => {
+        navigate('/student-dashboard');
+    };
+
     if (loading) return <div className="dashboard-container"><p>Loading...</p></div>;
 
     return (
         <div className="dashboard-container">
-            <nav className="dashboard-nav">
-                <h2>Algonauts Portal - Mentor</h2>
-                <div className="nav-user">
-                    <span>{user?.name}</span>
-                    <button onClick={handleLogout} className="btn btn-secondary">Logout</button>
+            <nav className="dashboard-nav" style={{
+                background: 'rgba(0, 0, 0, 0.3)',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+                backdropFilter: 'blur(10px)',
+                padding: '1rem 2rem',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+            }}>
+                <div 
+                    onClick={handleLogoClick}
+                    style={{ fontSize: '1.8rem', fontWeight: 'bold', color: 'white', letterSpacing: '1px', cursor: 'pointer' }}
+                >
+                    Algonauts
+                </div>
+                <div className="nav-user" style={{ position: 'relative' }}>
+                    <button 
+                        onClick={() => setShowProfileMenu(!showProfileMenu)}
+                        style={{
+                            background: 'rgba(255, 255, 255, 0.1)',
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                            color: 'white',
+                            padding: '0.5rem 1rem',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            transition: 'all 0.3s ease'
+                        }}
+                    >
+                        {user?.name}
+                        <span style={{ fontSize: '0.8rem' }}>▼</span>
+                    </button>
+                    {showProfileMenu && (
+                        <div style={{
+                            position: 'absolute',
+                            top: '100%',
+                            right: 0,
+                            marginTop: '0.5rem',
+                            background: 'rgba(0, 0, 0, 0.9)',
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                            borderRadius: '6px',
+                            minWidth: '200px',
+                            zIndex: 1000,
+                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+                        }}>
+                            <div style={{ padding: '0.5rem 0' }}>
+                                <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', color: '#aaa', fontSize: '0.9rem' }}>
+                                    {user?.email}
+                                </div>
+                                <button
+                                    onClick={handleLogout}
+                                    style={{
+                                        width: '100%',
+                                        background: 'transparent',
+                                        border: 'none',
+                                        color: 'white',
+                                        padding: '0.75rem 1rem',
+                                        textAlign: 'left',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                    onMouseEnter={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'}
+                                    onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                                >
+                                    Logout
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </nav>
 
@@ -176,26 +232,30 @@ const MentorDashboard = () => {
                 <main className="main-content" style={{ width: '100%' }}>
                     {activeSection === 'main' && (
                         <div className="animate-fade-in">
-                            <h1>Welcome, {user?.name}!</h1>
-                            <p style={{ marginBottom: '3rem', color: '#666' }}>Choose a section to manage your groups and track student performance.</p>
+                            <h1 style={{ color: 'white' }}>Welcome, {user?.name}!</h1>
+                            <p style={{ marginBottom: '3rem', color: '#aaa' }}>Choose a section to manage your groups and track student performance.</p>
                             
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
                                 <div 
                                     className="queue-item" 
-                                    style={{ cursor: 'pointer', textAlign: 'center', padding: '2rem' }}
+                                    style={{ cursor: 'pointer', textAlign: 'center', padding: '2rem', background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '8px', transition: 'all 0.3s ease' }}
                                     onClick={() => setActiveSection('groups')}
+                                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)'}
+                                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
                                 >
-                                    <h2 style={{ margin: '0 0 1rem 0', color: '#007bff' }}>Groups</h2>
-                                    <p style={{ color: '#666' }}>Create and manage groups, add students, assign problem sets</p>
+                                    <h2 style={{ margin: '0 0 1rem 0', color: 'white' }}>Groups</h2>
+                                    <p style={{ color: '#aaa' }}>Create and manage groups, add students, assign problem sets</p>
                                 </div>
                                 
                                 <div 
                                     className="queue-item" 
-                                    style={{ cursor: 'pointer', textAlign: 'center', padding: '2rem' }}
+                                    style={{ cursor: 'pointer', textAlign: 'center', padding: '2rem', background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '8px', transition: 'all 0.3s ease' }}
                                     onClick={() => setActiveSection('performance')}
+                                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)'}
+                                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
                                 >
-                                    <h2 style={{ margin: '0 0 1rem 0', color: '#007bff' }}>Student Performance</h2>
-                                    <p style={{ color: '#666' }}>View detailed statistics and progress of students in your groups</p>
+                                    <h2 style={{ margin: '0 0 1rem 0', color: 'white' }}>Student Performance</h2>
+                                    <p style={{ color: '#aaa' }}>View detailed statistics and progress of students in your groups</p>
                                 </div>
                             </div>
                         </div>
@@ -212,8 +272,8 @@ const MentorDashboard = () => {
                                 </button>
                             </div>
 
-                            <div className="dashboard-content">
-                                <aside className="sidebar">
+                            <div className="dashboard-content" style={{ display: 'flex', gap: '2rem', minHeight: 'calc(100vh - 200px)' }}>
+                                <aside className="sidebar" style={{ minHeight: '100%' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 10px 10px' }}>
                                         <h3 style={{ margin: 0, fontSize: '0.9rem', color: '#666' }}>GROUPS</h3>
                                         <button className="btn btn-sm btn-secondary" onClick={() => {
@@ -229,7 +289,6 @@ const MentorDashboard = () => {
                                                 setSelectedGroup(group);
                                                 setSelectedSet(null);
                                                 fetchSets(group._id);
-                                                fetchStats(group._id);
                                                 setShowAddGroup(false);
                                             }}
                                         >
@@ -241,13 +300,13 @@ const MentorDashboard = () => {
                                 <main className="main-content">
                                     {showAddGroup && (
                                         <div className="animate-fade-in">
-                                            <h2>Create New Group</h2>
-                                            <form onSubmit={handleCreateGroup} className="form">
+                                            <h2 style={{ color: 'white' }}>Create New Group</h2>
+                                            <form onSubmit={handleCreateGroup} className="form" style={{ background: 'rgba(255, 255, 255, 0.1)', padding: '1.5rem', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.2)', maxWidth: '500px' }}>
                                                 <div className="form-group">
-                                                    <label>Group Name</label>
-                                                    <input value={newGroupName} onChange={e => setNewGroupName(e.target.value)} placeholder="e.g. Batch of 2025" required />
+                                                    <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Group Name</label>
+                                                    <input value={newGroupName} onChange={e => setNewGroupName(e.target.value)} placeholder="e.g. Batch of 2025" required style={{ width: '100%', padding: '0.7rem', background: '#222', color: 'white', border: '1px solid #444', borderRadius: '6px', boxSizing: 'border-box' }} />
                                                 </div>
-                                                <button type="submit" className="btn btn-primary">Create Group</button>
+                                                <button type="submit" className="btn btn-primary" style={{ background: 'white', color: '#000', fontWeight: 'bold', padding: '0.7rem 1.5rem', marginTop: '1rem' }}>Create Group</button>
                                             </form>
                                         </div>
                                     )}
@@ -262,130 +321,128 @@ const MentorDashboard = () => {
                                     {selectedGroup && (
                                         <div className="animate-fade-in">
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                                                <h1>{selectedGroup.groupName}</h1>
-                                                <div>
-                                                    <button className="btn btn-secondary" onClick={() => setShowAddStudent(!showAddStudent)}>
-                                                        {showAddStudent ? 'Close' : 'Add Students'}
-                                                    </button>
-                                                </div>
+                                                <h1 style={{ color: 'white' }}>{selectedGroup.groupName}</h1>
+                                                <button className="btn btn-secondary" onClick={() => setShowAddStudent(!showAddStudent)}>
+                                                    {showAddStudent ? 'Close' : 'Add Students'}
+                                                </button>
                                             </div>
 
                                             {showAddStudent && (
-                                                <div className="form-card" style={{ marginBottom: '2rem' }}>
-                                                    <h3>Add Students by Email</h3>
+                                                <div style={{ marginBottom: '2rem', background: 'rgba(255, 255, 255, 0.1)', padding: '1.5rem', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
+                                                    <h3 style={{ marginTop: 0, color: 'white' }}>Add Students by Email</h3>
                                                     <form onSubmit={handleAddStudents} className="form">
-                                                        <textarea value={studentEmails} onChange={e => setStudentEmails(e.target.value)} placeholder="email1@gmail.com, email2@gmail.com" rows={3} />
-                                                        <button type="submit" className="btn btn-primary" style={{ marginTop: '10px' }}>Add</button>
+                                                        <div className="form-group">
+                                                            <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Student Emails</label>
+                                                            <textarea value={studentEmails} onChange={e => setStudentEmails(e.target.value)} placeholder="email1@gmail.com, email2@gmail.com" rows={3} style={{ width: '100%', padding: '0.7rem', background: '#222', color: 'white', border: '1px solid #444', borderRadius: '6px', boxSizing: 'border-box', fontFamily: 'inherit' }} />
+                                                        </div>
+                                                        <button type="submit" className="btn btn-primary" style={{ background: 'white', color: '#000', fontWeight: 'bold', padding: '0.7rem 1.5rem', marginTop: '1rem' }}>Add Students</button>
                                                     </form>
                                                 </div>
                                             )}
 
-                                            <div className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '2rem' }}>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: '2rem' }}>
                                                 <section>
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                                        <h2>Problem Sets</h2>
+                                                        <h2 style={{ color: 'white' }}>Problem Sets</h2>
                                                         <button className="btn btn-primary btn-sm" onClick={() => setShowAddSet(true)}>+ New Set</button>
                                                     </div>
 
-                                                    {showAddSet && (
-                                                        <div className="form-card" style={{ marginBottom: '1rem' }}>
-                                                            <form onSubmit={handleCreateSet} className="form" style={{ display: 'flex', gap: '10px' }}>
-                                                                <input value={newSetName} onChange={e => setNewSetName(e.target.value)} placeholder="Set Name (e.g. Graph Theory)" required />
-                                                                <button type="submit" className="btn btn-primary">Create</button>
-                                                                <button type="button" className="btn btn-secondary" onClick={() => setShowAddSet(false)}>Cancel</button>
-                                                            </form>
+                                            {showAddSet && (
+                                                <div style={{ marginBottom: '1rem', background: 'rgba(255, 255, 255, 0.1)', padding: '1.5rem', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
+                                                    <form onSubmit={handleCreateSet} className="form" style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
+                                                        <div style={{ flex: 1 }}>
+                                                            <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem' }}>Set Name</label>
+                                                            <input value={newSetName} onChange={e => setNewSetName(e.target.value)} placeholder="e.g. Graph Theory" required style={{ width: '100%', padding: '0.7rem', background: '#222', color: 'white', border: '1px solid #444', borderRadius: '6px', boxSizing: 'border-box' }} />
                                                         </div>
-                                                    )}
+                                                        <button type="submit" className="btn btn-primary" style={{ background: 'white', color: '#000', fontWeight: 'bold', padding: '0.7rem 1.5rem' }}>Create</button>
+                                                        <button type="button" className="btn btn-secondary" onClick={() => setShowAddSet(false)} style={{ padding: '0.7rem 1.5rem' }}>Cancel</button>
+                                                    </form>
+                                                </div>
+                                            )}
 
-                                                    <div className="sets-list">
-                                                        {problemSets.length === 0 ? (
-                                                            <p style={{ color: '#666' }}>No problem sets created yet.</p>
-                                                        ) : (
-                                                            problemSets.map(set => (
-                                                                <div key={set._id} className={`set-card ${selectedSet?._id === set._id ? 'selected' : ''}`} style={{
-                                                                    background: 'rgba(255,255,255,0.1)',
-                                                                    padding: '15px',
-                                                                    borderRadius: '8px',
-                                                                    marginBottom: '10px',
-                                                                    border: selectedSet?._id === set._id ? '1px solid #007bff' : '1px solid rgba(255,255,255,0.2)',
-                                                                    cursor: 'pointer'
-                                                                }} onClick={() => setSelectedSet(set)}>
-                                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                                        <h3 style={{ margin: 0 }}>{set.setName}</h3>
-                                                                        <span style={{ fontSize: '0.8rem', color: '#666' }}>{set.problems?.length || 0} Problems</span>
+                                            <div className="sets-list">
+                                                {problemSets.length === 0 ? (
+                                                    <p style={{ color: '#666' }}>No problem sets created yet.</p>
+                                                ) : (
+                                                    problemSets.map(set => (
+                                                        <div key={set._id} style={{
+                                                            background: 'rgba(255,255,255,0.1)',
+                                                            padding: '15px',
+                                                            borderRadius: '8px',
+                                                            marginBottom: '10px',
+                                                            border: selectedSet?._id === set._id ? '1px solid white' : '1px solid rgba(255,255,255,0.2)',
+                                                            cursor: 'pointer'
+                                                        }} onClick={() => setSelectedSet(set)}>
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                                <h3 style={{ margin: 0, color: 'white' }}>{set.setName}</h3>
+                                                                <span style={{ fontSize: '0.8rem', color: '#666' }}>{set.problems?.length || 0} Problems</span>
+                                                            </div>
+
+                                                            {selectedSet?._id === set._id && (
+                                                                <div style={{ marginTop: '15px', paddingTop: '15px', borderTop: '1px solid rgba(255,255,255,0.2)' }}>
+                                                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
+                                                                        <h4 style={{ margin: 0, color: 'white' }}>Problems</h4>
+                                                                        <button className="btn btn-secondary btn-sm" onClick={() => setShowAddProblem(true)}>Add Problem</button>
                                                                     </div>
 
-                                                                    {selectedSet?._id === set._id && (
-                                                                        <div className="set-details animate-fade-in" style={{ marginTop: '15px', paddingTop: '15px', borderTop: '1px solid rgba(255,255,255,0.2)' }}>
-                                                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
-                                                                                <h4 style={{ margin: 0 }}>Problems</h4>
-                                                                                <button className="btn btn-secondary btn-sm" onClick={() => setShowAddProblem(true)}>Add Problem</button>
+                                                                    {showAddProblem && (
+                                                                        <form onSubmit={handleAddProblem} className="form" style={{ marginBottom: '15px', padding: '1.5rem', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
+                                                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+                                                                                <div>
+                                                                                    <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem' }}>Title</label>
+                                                                                    <input value={problemForm.title} onChange={e => setProblemForm({ ...problemForm, title: e.target.value })} placeholder="Problem Title" required style={{ width: '100%', padding: '0.7rem', background: '#222', color: 'white', border: '1px solid #444', borderRadius: '6px', boxSizing: 'border-box' }} />
+                                                                                </div>
+                                                                                <div>
+                                                                                    <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem' }}>Link</label>
+                                                                                    <input value={problemForm.link} onChange={e => setProblemForm({ ...problemForm, link: e.target.value })} placeholder="Problem Link" required style={{ width: '100%', padding: '0.7rem', background: '#222', color: 'white', border: '1px solid #444', borderRadius: '6px', boxSizing: 'border-box' }} />
+                                                                                </div>
                                                                             </div>
-
-                                                                            {showAddProblem && (
-                                                                                <form onSubmit={handleAddProblem} className="form" style={{ marginBottom: '15px', padding: '10px', background: 'rgba(0,0,0,0.2)', borderRadius: '5px' }}>
-                                                                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                                                                                        <input value={problemForm.title} onChange={e => setProblemForm({ ...problemForm, title: e.target.value })} placeholder="Title" required />
-                                                                                        <input value={problemForm.link} onChange={e => setProblemForm({ ...problemForm, link: e.target.value })} placeholder="Link" required />
-                                                                                    </div>
-                                                                                    <div style={{ marginTop: '10px', display: 'flex', gap: '10px' }}>
-                                                                                        <select style={{ background: '#222', color: 'white', border: '1px solid #444', padding: '5px' }} value={problemForm.platform} onChange={e => setProblemForm({ ...problemForm, platform: e.target.value })}>
-                                                                                            <option value="Codeforces">Codeforces</option>
-                                                                                            <option value="LeetCode">LeetCode</option>
-                                                                                            <option value="AtCoder">AtCoder</option>
-                                                                                            <option value="Other">Other</option>
-                                                                                        </select>
-                                                                                        <button type="submit" className="btn btn-primary btn-sm">Save</button>
-                                                                                        <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowAddProblem(false)}>Cancel</button>
-                                                                                    </div>
-                                                                                </form>
-                                                                            )}
-
-                                                                            <div className="problems-mini-list">
-                                                                                {set.problems?.map((p, i) => (
-                                                                                    <div key={p._id} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: i < set.problems.length - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none' }}>
-                                                                                        <a href={p.link} target="_blank" rel="noreferrer" style={{ color: '#007bff', textDecoration: 'none', fontSize: '0.9rem' }}>{p.title}</a>
-                                                                                        <span style={{ fontSize: '0.7rem', color: '#666' }}>{p.platform}</span>
-                                                                                    </div>
-                                                                                ))}
-                                                                                {(!set.problems || set.problems.length === 0) && <p style={{ fontSize: '0.8rem', color: '#666' }}>No problems in this set.</p>}
+                                                                            <div style={{ marginBottom: '15px' }}>
+                                                                                <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem' }}>Platform</label>
+                                                                                <select value={problemForm.platform} onChange={e => setProblemForm({ ...problemForm, platform: e.target.value })} style={{ width: '100%', background: '#222', color: 'white', border: '1px solid #444', padding: '0.7rem', borderRadius: '6px', boxSizing: 'border-box' }}>
+                                                                                    <option value="Codeforces">Codeforces</option>
+                                                                                    <option value="LeetCode">LeetCode</option>
+                                                                                    <option value="AtCoder">AtCoder</option>
+                                                                                    <option value="Other">Other</option>
+                                                                                </select>
                                                                             </div>
-                                                                        </div>
+                                                                            <div style={{ display: 'flex', gap: '10px' }}>
+                                                                                <button type="submit" className="btn btn-primary" style={{ background: 'white', color: '#000', fontWeight: 'bold', padding: '0.7rem 1.5rem' }}>Save</button>
+                                                                                <button type="button" className="btn btn-secondary" onClick={() => setShowAddProblem(false)} style={{ padding: '0.7rem 1.5rem' }}>Cancel</button>
+                                                                            </div>
+                                                                        </form>
                                                                     )}
+
+                                                                    <div>
+                                                                        {set.problems?.map((p, i) => (
+                                                                            <div key={p._id} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: i < set.problems.length - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none' }}>
+                                                                                <a href={p.link} target="_blank" rel="noreferrer" style={{ color: 'white', textDecoration: 'none', fontSize: '0.9rem' }}>{p.title}</a>
+                                                                                <span style={{ fontSize: '0.7rem', color: '#666' }}>{p.platform}</span>
+                                                                            </div>
+                                                                        ))}
+                                                                        {(!set.problems || set.problems.length === 0) && <p style={{ fontSize: '0.8rem', color: '#666' }}>No problems in this set.</p>}
+                                                                    </div>
                                                                 </div>
-                                                            ))
-                                                        )}
+                                                            )}
+                                                        </div>
+                                                    ))
+                                                )}
                                                     </div>
                                                 </section>
 
-                                                <section>
-                                                    <h3>Group Stats</h3>
-                                                    {groupStats ? (
-                                                        <div className="stats-sidebar">
-                                                            <div className="stat-item" style={{ background: 'rgba(255, 255, 255, 0.1)', padding: '15px', borderRadius: '8px', marginBottom: '10px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
-                                                                <div style={{ fontSize: '0.8rem', color: '#666' }}>Students</div>
-                                                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'white' }}>{selectedGroup.students.length}</div>
+                                                <section style={{ background: 'rgba(255, 255, 255, 0.1)', padding: '1.5rem', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.2)', height: 'fit-content', maxHeight: '600px', overflowY: 'auto' }}>
+                                                    <h3 style={{ marginTop: 0, color: 'white' }}>Students ({selectedGroup.students.length})</h3>
+                                                    <div>
+                                                        {selectedGroup.students.map(s => (
+                                                            <div key={s._id} style={{ padding: '0.75rem 0', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                                                                <div style={{ fontWeight: 'bold', color: 'white', fontSize: '0.9rem' }}>{s.name}</div>
+                                                                <div style={{ fontSize: '0.8rem', color: '#aaa' }}>{s.email}</div>
                                                             </div>
-                                                            <div className="stat-item" style={{ background: 'rgba(255, 255, 255, 0.1)', padding: '15px', borderRadius: '8px', marginBottom: '10px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
-                                                                <div style={{ fontSize: '0.8rem', color: '#666' }}>Total Problems</div>
-                                                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'white' }}>{groupStats.questionStats?.length || 0}</div>
-                                                            </div>
-
-                                                            <h4 style={{ marginTop: '2rem', color: 'white' }}>Students</h4>
-                                                            <div className="student-mini-list" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                                                                {selectedGroup.students.map(s => (
-                                                                    <div key={s._id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>
-                                                                        <div style={{ fontSize: '0.85rem', color: 'white' }}>{s.name}</div>
-                                                                        <div style={{ fontSize: '0.8rem', color: '#666' }}>{s.email}</div>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    ) : (
-                                                        <p>Select a group to see stats.</p>
-                                                    )}
+                                                        ))}
+                                                    </div>
                                                 </section>
                                             </div>
+
                                         </div>
                                     )}
                                 </main>
@@ -444,7 +501,7 @@ const MentorDashboard = () => {
                                                                     <div style={{ fontSize: '0.8rem', color: '#666' }}>{student.email}</div>
                                                                 </div>
                                                             </td>
-                                                            <td style={{ padding: '1rem', textAlign: 'center', color: '#007bff', fontWeight: 'bold' }}>{student.contestGiven || 0}</td>
+                                                            <td style={{ padding: '1rem', textAlign: 'center', color: 'white', fontWeight: 'bold' }}>{student.contestGiven || 0}</td>
                                                         </tr>
                                                     ))
                                                 )}

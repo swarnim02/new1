@@ -12,8 +12,8 @@ const contestSchema = new mongoose.Schema({
         required: true
     },
     problems: [{
-        order: { type: String, required: true }, // A, B, C, D...
-        link: { type: String, required: true }
+        order: String,
+        link: String
     }]
 }, { timestamps: true });
 

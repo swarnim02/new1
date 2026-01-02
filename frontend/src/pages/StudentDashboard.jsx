@@ -8,7 +8,7 @@ const StudentDashboard = () => {
     const navigate = useNavigate();
     const [recentContests, setRecentContests] = useState([]);
     const [upsolveQueue, setUpsolveQueue] = useState([]);
-    const [statusMessage, setStatusMessage] = useState(null); // { type: 'success'|'error', text: '' }
+    const [statusMessage, setStatusMessage] = useState(null);
     const [stats, setStats] = useState(null);
     const [upsolveStats, setUpsolveStats] = useState({
         contestGiven: 0,
@@ -18,10 +18,11 @@ const StudentDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('queue');
     const [customContestId, setCustomContestId] = useState('');
-    const [studentGroups, setStudentGroups] = useState([]); // Array of { groupId, groupName, problems }
+    const [studentGroups, setStudentGroups] = useState([]);
     const [selectedGroup, setSelectedGroup] = useState(null);
     const [selectedSet, setSelectedSet] = useState(null);
     const [solveModal, setSolveModal] = useState({ show: false, problem: null, timeTaken: '<20min', learnings: '' });
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
 
     useEffect(() => {
         fetchData();
@@ -70,64 +71,6 @@ const StudentDashboard = () => {
         }
     };
 
-    const handleVerifyQueue = async () => {
-        const btn = document.getElementById('verify-all-btn');
-        if (btn) { btn.innerText = 'Verifying...'; btn.disabled = true; }
-
-        setStatusMessage({ type: 'info', text: 'Checking status of ALL pending problems from Codeforces...' });
-
-        try {
-            const res = await studentAPI.verifyQueue();
-            const { checked, solved } = res.data;
-
-            if (solved > 0) {
-                setStatusMessage({ type: 'success', text: `Verified ${checked} problems. Marked ${solved} as Solved! 🎉` });
-                fetchData();
-            } else {
-                setStatusMessage({ type: 'info', text: `Checked ${checked} problems. No new solves found yet.` });
-            }
-        } catch (error) {
-            console.error(error);
-            setStatusMessage({ type: 'error', text: 'Verification failed.' });
-        } finally {
-            if (btn) { btn.innerText = 'Verify Status 🔄'; btn.disabled = false; }
-        }
-    };
-
-    const handleSmartUpsolve = async (contestId, count) => {
-        if (!confirm(`Auto-fetch next ${count} unsolved problems from Codeforces?`)) return;
-
-        try {
-            // Optimistic UI or just simple blocking for now
-            const res = await studentAPI.smartUpsolve(contestId, count);
-            alert(res.data.message);
-            fetchData(); // Refresh queue and contests
-        } catch (error) {
-            console.error(error);
-            alert(error.response?.data?.message || 'Error executing smart upsolve. Check if your handle is correct!');
-        }
-    };
-
-
-    const handleAddCustomContest = async (id, count) => {
-        const targetId = id || customContestId;
-
-        if (!targetId || !targetId.toString().trim()) {
-            alert('Please enter a Codeforces Contest ID');
-            return;
-        }
-
-        try {
-            const res = await studentAPI.addPersonalContest(targetId, count);
-            alert(res.data.message);
-            setCustomContestId(''); // Clear input if used
-            fetchData();
-        } catch (error) {
-            console.error(error);
-            alert(error.response?.data?.message || 'Error adding personal contest. Check ID and Handle.');
-        }
-    };
-
     const handleFetchStatus = async () => {
         setStatusMessage({ type: 'info', text: 'Syncing with Codeforces... Usually takes 5-10 seconds.' });
 
@@ -148,14 +91,8 @@ const StudentDashboard = () => {
             const errMsg = error.response?.data?.message || 'Error fetching status.';
             setStatusMessage({ type: 'error', text: errMsg });
         } finally {
-            if (btn) { btn.disabled = false; btn.innerText = 'Fetch Current Status 🔄'; }
+            if (btn) { btn.disabled = false; btn.innerText = 'Fetch Current Status'; }
         }
-    };
-
-    const handleRefresh = () => {
-        setLoading(true);
-        fetchData();
-        fetchGroupProblems();
     };
 
     const handleLogout = async () => {
@@ -168,33 +105,127 @@ const StudentDashboard = () => {
     return (
         <div className="dashboard-container">
             <nav className="dashboard-nav">
-                <h2>Algonauts - Student {studentGroups.length > 0 && <span style={{ fontSize: '1rem', color: '#aaa', marginLeft: '10px' }}>({studentGroups.length} Groups)</span>}</h2>
-                <div className="nav-user">
-                    <span>{user?.name}</span>
-                    <button onClick={handleRefresh} className="btn btn-secondary" style={{ marginRight: '10px' }}>Refresh</button>
-                    <button onClick={handleLogout} className="btn btn-secondary">Logout</button>
+                <h2>Algonauts</h2>
+                <div className="nav-user" style={{ position: 'relative' }}>
+                    <button 
+                        onClick={() => setShowProfileMenu(!showProfileMenu)}
+                        style={{
+                            background: 'rgba(255, 255, 255, 0.1)',
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                            color: 'white',
+                            padding: '0.5rem 1rem',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            transition: 'all 0.3s ease'
+                        }}
+                    >
+                        {user?.name}
+                        <span style={{ fontSize: '0.8rem' }}>▼</span>
+                    </button>
+                    {showProfileMenu && (
+                        <div style={{
+                            position: 'absolute',
+                            top: '100%',
+                            right: 0,
+                            marginTop: '0.5rem',
+                            background: 'rgba(0, 0, 0, 0.9)',
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                            borderRadius: '6px',
+                            minWidth: '200px',
+                            zIndex: 1000,
+                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+                        }}>
+                            <div style={{ padding: '0.5rem 0' }}>
+                                <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', color: '#aaa', fontSize: '0.9rem' }}>
+                                    {user?.email}
+                                </div>
+                                <button
+                                    onClick={handleLogout}
+                                    style={{
+                                        width: '100%',
+                                        background: 'transparent',
+                                        border: 'none',
+                                        color: 'white',
+                                        padding: '0.75rem 1rem',
+                                        textAlign: 'left',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                    onMouseEnter={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'}
+                                    onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                                >
+                                    Logout
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </nav>
 
             <div className="dashboard-content">
-                <aside className="sidebar">
+                <aside className="sidebar" style={{ background: 'rgba(0, 0, 0, 0.4)', borderRight: '1px solid rgba(255, 255, 255, 0.2)' }}>
                     <button
-                        className={activeTab === 'queue' ? 'active' : ''}
                         onClick={() => setActiveTab('queue')}
+                        style={{
+                            background: activeTab === 'queue' ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
+                            borderLeft: activeTab === 'queue' ? '3px solid white' : '3px solid transparent',
+                            color: activeTab === 'queue' ? 'white' : '#aaa',
+                            padding: '1rem 1.5rem',
+                            textAlign: 'left',
+                            border: 'none',
+                            cursor: 'pointer',
+                            width: '100%',
+                            transition: 'all 0.3s ease',
+                            fontSize: '1rem',
+                            fontWeight: activeTab === 'queue' ? 'bold' : 'normal'
+                        }}
+                        onMouseEnter={(e) => {
+                            if (activeTab !== 'queue') {
+                                e.target.style.background = 'rgba(255, 255, 255, 0.08)';
+                                e.target.style.color = 'white';
+                            }
+                        }}
+                        onMouseLeave={(e) => {
+                            if (activeTab !== 'queue') {
+                                e.target.style.background = 'transparent';
+                                e.target.style.color = '#aaa';
+                            }
+                        }}
                     >
                         Upsolve Queue
                     </button>
                     <button
-                        className={activeTab === 'groups' ? 'active' : ''}
                         onClick={() => setActiveTab('groups')}
+                        style={{
+                            background: activeTab === 'groups' ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
+                            borderLeft: activeTab === 'groups' ? '3px solid white' : '3px solid transparent',
+                            color: activeTab === 'groups' ? 'white' : '#aaa',
+                            padding: '1rem 1.5rem',
+                            textAlign: 'left',
+                            border: 'none',
+                            cursor: 'pointer',
+                            width: '100%',
+                            transition: 'all 0.3s ease',
+                            fontSize: '1rem',
+                            fontWeight: activeTab === 'groups' ? 'bold' : 'normal'
+                        }}
+                        onMouseEnter={(e) => {
+                            if (activeTab !== 'groups') {
+                                e.target.style.background = 'rgba(255, 255, 255, 0.08)';
+                                e.target.style.color = 'white';
+                            }
+                        }}
+                        onMouseLeave={(e) => {
+                            if (activeTab !== 'groups') {
+                                e.target.style.background = 'transparent';
+                                e.target.style.color = '#aaa';
+                            }
+                        }}
                     >
                         Groups
-                    </button>
-                    <button
-                        className={activeTab === 'stats' ? 'active' : ''}
-                        onClick={() => setActiveTab('stats')}
-                    >
-                        Statistics
                     </button>
                 </aside>
 
@@ -202,20 +233,19 @@ const StudentDashboard = () => {
                     {activeTab === 'queue' && (
                         <div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                                <h2>Your Upsolve Queue</h2>
+                                <h2 style={{ color: 'white' }}>Your Upsolve Queue</h2>
                                 <div style={{ display: 'flex', gap: '10px' }}>
                                     <button
                                         id="fetch-status-btn"
                                         className="btn btn-primary"
                                         onClick={handleFetchStatus}
-                                        style={{ background: 'var(--primary)' }}
+                                        style={{ background: 'white', color: '#000', fontWeight: 'bold' }}
                                     >
                                         Fetch Current Status
                                     </button>
                                 </div>
                             </div>
 
-                            {/* Precise Upsolve Stats */}
                             <div className="stats-grid" style={{ marginBottom: '20px', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px' }}>
                                 <div className="stat-card" style={{ 
                                     padding: '15px', 
@@ -268,12 +298,12 @@ const StudentDashboard = () => {
                             {upsolveQueue.length === 0 ? (
                                 <div className="empty-state">
                                     <h3>All caught up!</h3>
-                                    <p>No pending problems in your queue. Click "Auto-Fill" to find new challenges.</p>
+                                    <p>No pending problems in your queue. Click "Fetch Current Status" to sync with Codeforces.</p>
                                 </div>
                             ) : (
                                 <div className="queue-list">
                                     {upsolveQueue.map((item, index) => (
-                                        <div key={item._id} className="queue-item" style={{ borderLeft: '4px solid #3498db' }}>
+                                        <div key={item._id} className="queue-item" style={{ borderLeft: '4px solid white' }}>
                                             <div className="queue-header">
                                                 <h3>
                                                     <a
@@ -304,8 +334,8 @@ const StudentDashboard = () => {
                     {activeTab === 'groups' && (
                         <div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                                <h2>Collaborative Groups</h2>
-                                <span className="status-badge" style={{ background: studentGroups.length > 0 ? 'var(--primary)' : '#e74c3c', padding: '5px 15px' }}>
+                                <h2 style={{ color: 'white' }}>Collaborative Groups</h2>
+                                <span className="status-badge" style={{ background: studentGroups.length > 0 ? 'white' : '#e74c3c', color: studentGroups.length > 0 ? '#000' : 'white', padding: '5px 15px', fontWeight: 'bold' }}>
                                     {studentGroups.length} {studentGroups.length === 1 ? 'Group' : 'Groups'} assigned
                                 </span>
                             </div>
@@ -324,10 +354,10 @@ const StudentDashboard = () => {
                                                 <div 
                                                     key={group.groupId} 
                                                     className="queue-item" 
-                                                    style={{ cursor: 'pointer', marginBottom: '1rem' }}
+                                                    style={{ cursor: 'pointer', marginBottom: '1rem', borderLeft: '4px solid white' }}
                                                     onClick={() => setSelectedGroup(group)}
                                                 >
-                                                    <h3 style={{ margin: 0, color: '#007bff' }}>{group.groupName}</h3>
+                                                    <h3 style={{ margin: 0, color: 'white' }}>{group.groupName}</h3>
                                                     <p style={{ margin: '0.5rem 0 0 0', color: '#666' }}>
                                                         {group.sets.length} problem sets
                                                     </p>
@@ -342,9 +372,9 @@ const StudentDashboard = () => {
                                                     onClick={() => setSelectedGroup(null)}
                                                     style={{ marginBottom: '1rem' }}
                                                 >
-                                                    ← Back to Groups
+                                                    Back to Groups
                                                 </button>
-                                                <h3 style={{ color: '#007bff' }}>Group: {selectedGroup.groupName}</h3>
+                                                <h3 style={{ color: 'white' }}>Group: {selectedGroup.groupName}</h3>
                                             </div>
 
                                             {selectedGroup.sets.length === 0 ? (
@@ -355,10 +385,10 @@ const StudentDashboard = () => {
                                                         <div 
                                                             key={set.setId} 
                                                             className="queue-item" 
-                                                            style={{ cursor: 'pointer', marginBottom: '1rem' }}
+                                                            style={{ cursor: 'pointer', marginBottom: '1rem', borderLeft: '4px solid white' }}
                                                             onClick={() => setSelectedSet(set)}
                                                         >
-                                                            <h4 style={{ margin: 0, color: '#007bff' }}>{set.setName}</h4>
+                                                            <h4 style={{ margin: 0, color: 'white' }}>{set.setName}</h4>
                                                             <p style={{ margin: '0.5rem 0 0 0', color: '#666' }}>
                                                                 {set.problems.length} problems
                                                             </p>
@@ -375,9 +405,9 @@ const StudentDashboard = () => {
                                                     onClick={() => setSelectedSet(null)}
                                                     style={{ marginBottom: '1rem' }}
                                                 >
-                                                    ← Back to Sets
+                                                    Back to Sets
                                                 </button>
-                                                <h4 style={{ color: '#007bff' }}>{selectedSet.setName}</h4>
+                                                <h4 style={{ color: 'white' }}>{selectedSet.setName}</h4>
                                             </div>
 
                                             <div style={{ 
@@ -439,32 +469,6 @@ const StudentDashboard = () => {
                             )}
                         </div>
                     )}
-
-                    {activeTab === 'stats' && (
-                        <div>
-                            <h2>Your Statistics</h2>
-                            {stats && (
-                                <div className="stats-grid">
-                                    <div className="stat-card">
-                                        <h3>Total Problems</h3>
-                                        <p className="stat-value">{stats.total}</p>
-                                    </div>
-                                    <div className="stat-card success">
-                                        <h3>Solved</h3>
-                                        <p className="stat-value">{stats.solved}</p>
-                                    </div>
-                                    <div className="stat-card pending">
-                                        <h3>Pending</h3>
-                                        <p className="stat-value">{stats.pending}</p>
-                                    </div>
-                                    <div className="stat-card">
-                                        <h3>Solve Rate</h3>
-                                        <p className="stat-value">{stats.solveRate}%</p>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    )}
                 </main>
             </div>
 
@@ -472,24 +476,24 @@ const StudentDashboard = () => {
             {solveModal.show && (
                 <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
                     <div className="modal-content animate-pop-in" style={{ background: '#1a1a1a', padding: '30px', borderRadius: '15px', width: '90%', maxWidth: '500px', border: '1px solid #333' }}>
-                        <h3>Mark as Solved: {solveModal.problem?.title}</h3>
+                        <h3 style={{ color: 'white' }}>Mark as Solved: {solveModal.problem?.title}</h3>
                         <form onSubmit={handleSolveSubmit} className="form" style={{ marginTop: '20px' }}>
                             <div className="form-group">
-                                <label>How long did it take?</label>
+                                <label style={{ color: '#ccc' }}>How long did it take?</label>
                                 <select
                                     className="form-control"
                                     value={solveModal.timeTaken}
                                     onChange={e => setSolveModal({ ...solveModal, timeTaken: e.target.value })}
                                     style={{ width: '100%', padding: '10px', background: '#222', color: '#fff', border: '1px solid #444', borderRadius: '5px' }}
                                 >
-                                    <option value="<20min">&lt; 20 minutes (Godspeed)</option>
-                                    <option value="<30min">&lt; 30 minutes (Fast)</option>
-                                    <option value="<1hour">&lt; 1 hour (Average)</option>
-                                    <option value="<3hour">&lt; 3 hours (Slow & Steady)</option>
+                                    <option value="<20min">Less than 20 minutes</option>
+                                    <option value="<30min">Less than 30 minutes</option>
+                                    <option value="<1hour">Less than 1 hour</option>
+                                    <option value="<3hour">Less than 3 hours</option>
                                 </select>
                             </div>
                             <div className="form-group" style={{ marginTop: '20px' }}>
-                                <label>Short Learning/Note (Optional)</label>
+                                <label style={{ color: '#ccc' }}>Short Learning/Note (Optional)</label>
                                 <textarea
                                     className="form-control"
                                     value={solveModal.learnings}
@@ -501,7 +505,7 @@ const StudentDashboard = () => {
                                 <small style={{ color: '#666' }}>Max 200 characters recommended.</small>
                             </div>
                             <div style={{ display: 'flex', gap: '10px', marginTop: '30px' }}>
-                                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Submit Solve</button>
+                                <button type="submit" className="btn btn-primary" style={{ flex: 1, background: 'white', color: '#000', fontWeight: 'bold' }}>Submit Solve</button>
                                 <button type="button" className="btn btn-secondary" onClick={() => setSolveModal({ ...solveModal, show: false })} style={{ flex: 1 }}>Cancel</button>
                             </div>
                         </form>

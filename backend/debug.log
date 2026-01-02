@@ -914,3 +914,52 @@
 [2026-01-01T12:09:02.551Z] Fetching queue for user: 69565163cd649584d42f5ea4
 [2026-01-01T12:09:02.661Z] Found 29 pending records in DB
 [2026-01-01T12:09:02.661Z] Returning 29 items to frontend
+[2026-01-02T05:42:27.857Z] Fetching queue for user: 69566c82d43c7efbdf778836
+[2026-01-02T05:42:27.905Z] Found 29 pending records in DB
+[2026-01-02T05:42:27.905Z] Returning 29 items to frontend
+[2026-01-02T05:42:27.922Z] Fetching queue for user: 69566c82d43c7efbdf778836
+[2026-01-02T05:42:27.961Z] Found 29 pending records in DB
+[2026-01-02T05:42:27.961Z] Returning 29 items to frontend
+[2026-01-02T05:42:30.700Z] [BulkUpsolve] Starting strict focus sync for cosmicnexus
+[2026-01-02T05:42:32.358Z] BulkUpsolve Focused Sync finished. Added: 0, Trashed/Synced: 0
+[2026-01-02T05:42:32.370Z] Fetching queue for user: 69566c82d43c7efbdf778836
+[2026-01-02T05:42:32.432Z] Found 29 pending records in DB
+[2026-01-02T05:42:32.433Z] Returning 29 items to frontend
+[2026-01-02T05:52:50.223Z] Fetching queue for user: 69566c82d43c7efbdf778836
+[2026-01-02T05:52:50.264Z] Found 29 pending records in DB
+[2026-01-02T05:52:50.265Z] Returning 29 items to frontend
+[2026-01-02T05:52:50.274Z] Fetching queue for user: 69566c82d43c7efbdf778836
+[2026-01-02T05:52:50.297Z] Found 29 pending records in DB
+[2026-01-02T05:52:50.297Z] Returning 29 items to frontend
+[2026-01-02T05:56:05.740Z] Fetching queue for user: 69566c82d43c7efbdf778836
+[2026-01-02T05:56:05.768Z] Found 29 pending records in DB
+[2026-01-02T05:56:05.768Z] Returning 29 items to frontend
+[2026-01-02T05:59:00.145Z] [BulkUpsolve] Starting strict focus sync for cosmicnexus
+[2026-01-02T05:59:01.812Z] BulkUpsolve Focused Sync finished. Added: 0, Trashed/Synced: 0
+[2026-01-02T05:59:01.838Z] Fetching queue for user: 69566c82d43c7efbdf778836
+[2026-01-02T05:59:01.876Z] Found 29 pending records in DB
+[2026-01-02T05:59:01.876Z] Returning 29 items to frontend
+[2026-01-02T06:01:04.727Z] Fetching queue for user: 69566c82d43c7efbdf778836
+[2026-01-02T06:01:04.778Z] Found 29 pending records in DB
+[2026-01-02T06:01:04.778Z] Returning 29 items to frontend
+[2026-01-02T06:01:04.792Z] Fetching queue for user: 69566c82d43c7efbdf778836
+[2026-01-02T06:01:04.817Z] Found 29 pending records in DB
+[2026-01-02T06:01:04.817Z] Returning 29 items to frontend
+[2026-01-02T06:11:55.725Z] Fetching queue for user: 69566c82d43c7efbdf778836
+[2026-01-02T06:11:55.752Z] Found 29 pending records in DB
+[2026-01-02T06:11:55.752Z] Returning 29 items to frontend
+[2026-01-02T06:11:55.765Z] Fetching queue for user: 69566c82d43c7efbdf778836
+[2026-01-02T06:11:55.809Z] Found 29 pending records in DB
+[2026-01-02T06:11:55.809Z] Returning 29 items to frontend
+[2026-01-02T06:17:51.470Z] Fetching queue for user: 69566c82d43c7efbdf778836
+[2026-01-02T06:17:51.504Z] Found 29 pending records in DB
+[2026-01-02T06:17:51.505Z] Get upsolve queue error: Cannot read properties of undefined (reading 'find')
+[2026-01-02T06:17:51.520Z] Fetching queue for user: 69566c82d43c7efbdf778836
+[2026-01-02T06:17:51.552Z] Found 29 pending records in DB
+[2026-01-02T06:17:51.553Z] Get upsolve queue error: Cannot read properties of undefined (reading 'find')
+[2026-01-02T06:21:20.412Z] Fetching queue for user: 69566c82d43c7efbdf778836
+[2026-01-02T06:21:20.442Z] Found 29 pending records in DB
+[2026-01-02T06:21:20.442Z] Returning 29 items to frontend
+[2026-01-02T06:21:20.453Z] Fetching queue for user: 69566c82d43c7efbdf778836
+[2026-01-02T06:21:20.477Z] Found 29 pending records in DB
+[2026-01-02T06:21:20.477Z] Returning 29 items to frontend
