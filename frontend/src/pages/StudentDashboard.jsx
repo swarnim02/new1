@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { studentAPI } from '../utils/api';
+import CodeforcesDashboard from '../components/CodeforcesDashboard';
 
 const StudentDashboard = () => {
     const { user, logout } = useAuth();
@@ -27,6 +28,13 @@ const StudentDashboard = () => {
     const [selectedContest, setSelectedContest] = useState(null);
     const [contestTab, setContestTab] = useState('upcoming');
     const [leaderboard, setLeaderboard] = useState([]);
+    const [cfHandle, setCfHandle] = useState('');
+    const [cfLoading, setCfLoading] = useState(false);
+    const [cfError, setCfError] = useState(null);
+    const [userData, setUserData] = useState(null);
+    const [ratingHistory, setRatingHistory] = useState([]);
+    const [submissions, setSubmissions] = useState([]);
+
 
     useEffect(() => {
         fetchData();
@@ -69,6 +77,46 @@ const StudentDashboard = () => {
             console.error('Error fetching contests:', error);
         }
     };
+
+    const fetchCfStats = async (handle) => {
+        setCfLoading(true);
+        setCfError(null);
+        setUserData(null);
+        setRatingHistory([]);
+        setSubmissions([]);
+        
+        try {
+            const trimmedHandle = handle.trim();
+            if (!trimmedHandle) {
+                setCfError('Username cannot be empty');
+                return;
+            }
+            
+            const [userRes, ratingRes, statusRes] = await Promise.all([
+                fetch(`https://codeforces.com/api/user.info?handles=${trimmedHandle}`),
+                fetch(`https://codeforces.com/api/user.rating?handle=${trimmedHandle}`),
+                fetch(`https://codeforces.com/api/user.status?handle=${trimmedHandle}`)
+            ]);
+            
+            const userData = await userRes.json();
+            const ratingData = await ratingRes.json();
+            const statusData = await statusRes.json();
+            
+            if (userData.status === 'OK' && ratingData.status === 'OK' && statusData.status === 'OK') {
+                setUserData(userData.result[0]);
+                setRatingHistory(ratingData.result);
+                setSubmissions(statusData.result);
+            } else {
+                setCfError('User not found or invalid username');
+            }
+        } catch (error) {
+            setCfError('Failed to fetch data. Please try again.');
+        } finally {
+            setCfLoading(false);
+        }
+    };
+
+
 
     const fetchLeaderboard = async (contestId) => {
         try {
@@ -290,6 +338,38 @@ const StudentDashboard = () => {
                     >
                         Contests
                     </button>
+
+                    <button
+                        onClick={() => setActiveTab('analytics')}
+                        style={{
+                            background: activeTab === 'analytics' ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
+                            borderLeft: activeTab === 'analytics' ? '3px solid white' : '3px solid transparent',
+                            color: activeTab === 'analytics' ? 'white' : '#aaa',
+                            padding: '1rem 1.5rem',
+                            textAlign: 'left',
+                            border: 'none',
+                            cursor: 'pointer',
+                            width: '100%',
+                            transition: 'all 0.3s ease',
+                            fontSize: '1rem',
+                            fontWeight: activeTab === 'analytics' ? 'bold' : 'normal'
+                        }}
+                        onMouseEnter={(e) => {
+                            if (activeTab !== 'analytics') {
+                                e.target.style.background = 'rgba(255, 255, 255, 0.08)';
+                                e.target.style.color = 'white';
+                            }
+                        }}
+                        onMouseLeave={(e) => {
+                            if (activeTab !== 'analytics') {
+                                e.target.style.background = 'transparent';
+                                e.target.style.color = '#aaa';
+                            }
+                        }}
+                    >
+                        Codeforces Analytics
+                    </button>
+
                 </aside>
 
                 <main className="main-content">
@@ -718,6 +798,19 @@ const StudentDashboard = () => {
                                 </div>
                             )}
                         </div>
+                    )}
+
+                    {activeTab === 'analytics' && (
+                        <CodeforcesDashboard 
+                            cfHandle={cfHandle}
+                            setCfHandle={setCfHandle}
+                            cfLoading={cfLoading}
+                            cfError={cfError}
+                            userData={userData}
+                            ratingHistory={ratingHistory}
+                            submissions={submissions}
+                            onFetchStats={fetchCfStats}
+                        />
                     )}
                 </main>
             </div>
