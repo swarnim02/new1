@@ -201,8 +201,9 @@ Server running on port 3001
 [dotenv@17.2.3] injecting env (4) from .env -- tip: ⚙️  override existing env vars with { override: true }
 Server running on port 3001
 ✅ MongoDB Connected: ac-lv9fopu-shard-00-01.jze4wzf.mongodb.net
-tarting due to changes...[39m
-[32m[nodemon] starting `node server.js`[39m
-[dotenv@17.2.3] injecting env (4) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
-Server running on port 3001
-✅ MongoDB Connected: ac-lv9fopu-shard-00-01.jze4wzf.mongodb.net
+Fetching contest list from Codeforces...
+Fetching global problems from Codeforces (Cache Expired/Empty)...
+Fetched and cached 2074 contests.
+Fetched and cached 10915 global problems.
+bulkUpsolve-69566c82d43c7efbdf778836: 1.739s
+B Connected: ac-lv9fopu-shard-00-01.jze4wzf.mongodb.net
