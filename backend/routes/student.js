@@ -14,7 +14,8 @@ const {
     getGroupProblems,
     submitGroupSolve,
     getGlobalContests,
-    registerForContest
+    registerForContest,
+    getContestLeaderboard
 } = require('../controllers/studentController');
 const { protect, authorize } = require('../middleware/auth');
 
@@ -36,5 +37,6 @@ router.get('/group-problems', getGroupProblems);
 router.post('/submit-solve/:problemId', submitGroupSolve);
 router.get('/global-contests', getGlobalContests);
 router.post('/register-contest/:contestId', registerForContest);
+router.get('/contest-leaderboard/:contestId', getContestLeaderboard);
 
 module.exports = router;

@@ -7,6 +7,7 @@ const {
     createContest,
     createGlobalContest,
     getGlobalContests,
+    updateGlobalContest,
     viewStudentProgress,
     addGroupProblem,
     getGroupStats,
@@ -25,6 +26,7 @@ router.post('/add-students/:groupId', addStudentsToGroup);
 router.post('/create-contest/:groupId', createContest);
 router.post('/create-global-contest', createGlobalContest);
 router.get('/global-contests', getGlobalContests);
+router.put('/global-contests/:contestId', updateGlobalContest);
 router.get('/progress/:groupId/:contestId', viewStudentProgress);
 router.post('/group-problem/:groupId', addGroupProblem);
 router.get('/group-stats/:groupId', getGroupStats);

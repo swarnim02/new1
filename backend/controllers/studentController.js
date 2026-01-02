@@ -956,6 +956,41 @@ const registerForContest = async (req, res) => {
     }
 };
 
+/**
+ * @desc    Get contest leaderboard
+ * @route   GET /api/student/contest-leaderboard/:contestId
+ * @access  Private (Student only)
+ */
+const getContestLeaderboard = async (req, res) => {
+    try {
+        const { contestId } = req.params;
+        const contest = await Contest.findById(contestId);
+        
+        if (!contest || !contest.isGlobal) {
+            return res.status(404).json({ message: 'Contest not found' });
+        }
+
+        // Get all registered students for this contest
+        const registeredStudents = await User.find({ 
+            _id: { $in: contest.registeredStudents },
+            role: 'student'
+        }).select('name email codeforcesHandle');
+
+        // Create leaderboard with placeholder data (can be enhanced with real submission data)
+        const leaderboard = registeredStudents.map(student => ({
+            name: student.name,
+            email: student.email,
+            solved: 0, // This would be calculated from actual submissions
+            score: 0   // This would be calculated from actual submissions
+        }));
+
+        res.status(200).json({ leaderboard });
+    } catch (error) {
+        console.error('Get contest leaderboard error:', error.message);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 module.exports = {
     getParticipatedContests,
     getMyContests,
@@ -970,6 +1005,7 @@ module.exports = {
     getGroupProblems,
     submitGroupSolve,
     getGlobalContests,
-    registerForContest
+    registerForContest,
+    getContestLeaderboard
 };
 

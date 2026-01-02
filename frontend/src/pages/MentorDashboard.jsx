@@ -16,6 +16,8 @@ const MentorDashboard = () => {
     const [contests, setContests] = useState([]);
     const [selectedContest, setSelectedContest] = useState(null);
     const [showCreateContest, setShowCreateContest] = useState(false);
+    const [leaderboard, setLeaderboard] = useState([]);
+    const [contestTab, setContestTab] = useState(null);
     const [contestForm, setContestForm] = useState({
         title: '',
         description: '',
@@ -23,6 +25,7 @@ const MentorDashboard = () => {
         endTime: '',
         problems: [{ title: '', link: '', platform: 'Codeforces' }]
     });
+    const [editingContest, setEditingContest] = useState(null);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [showAddGroup, setShowAddGroup] = useState(false);
     const [showAddSet, setShowAddSet] = useState(false);
@@ -47,6 +50,15 @@ const MentorDashboard = () => {
         } catch (error) {
             console.error('Error fetching contests:', error);
             setContests([]);
+        }
+    };
+
+    const fetchLeaderboard = async (contestId) => {
+        try {
+            const response = await mentorAPI.getContestLeaderboard(contestId);
+            setLeaderboard(response.data.leaderboard || []);
+        } catch (error) {
+            console.error('Error fetching leaderboard:', error);
         }
     };
 
@@ -116,7 +128,13 @@ const MentorDashboard = () => {
     const handleCreateContest = async (e) => {
         e.preventDefault();
         try {
-            await mentorAPI.createGlobalContest(contestForm);
+            if (editingContest) {
+                await mentorAPI.updateGlobalContest(editingContest._id, contestForm);
+                alert('Contest updated successfully!');
+            } else {
+                await mentorAPI.createGlobalContest(contestForm);
+                alert('Contest created successfully!');
+            }
             setContestForm({
                 title: '',
                 description: '',
@@ -125,10 +143,10 @@ const MentorDashboard = () => {
                 problems: [{ title: '', link: '', platform: 'Codeforces' }]
             });
             setShowCreateContest(false);
+            setEditingContest(null);
             fetchContests();
-            alert('Contest created successfully!');
         } catch (error) {
-            alert(error.response?.data?.message || 'Error creating contest');
+            alert(error.response?.data?.message || 'Error saving contest');
         }
     };
 
@@ -576,13 +594,34 @@ const MentorDashboard = () => {
                                     ← Back to Main
                                 </button>
                                 {!selectedContest && (
-                                    <button 
-                                        className="btn btn-primary" 
-                                        onClick={() => setShowCreateContest(true)}
-                                        style={{ marginLeft: '1rem' }}
-                                    >
-                                        Create Contest
-                                    </button>
+                                    <>
+                                        <button 
+                                            className="btn btn-primary" 
+                                            onClick={() => setShowCreateContest(true)}
+                                            style={{ marginLeft: '1rem' }}
+                                        >
+                                            Create Contest
+                                        </button>
+                                        {editingContest && (
+                                            <button 
+                                                className="btn btn-secondary" 
+                                                onClick={() => {
+                                                    setEditingContest(null);
+                                                    setShowCreateContest(false);
+                                                    setContestForm({
+                                                        title: '',
+                                                        description: '',
+                                                        startTime: '',
+                                                        endTime: '',
+                                                        problems: [{ title: '', link: '', platform: 'Codeforces' }]
+                                                    });
+                                                }}
+                                                style={{ marginLeft: '1rem' }}
+                                            >
+                                                Cancel Edit
+                                            </button>
+                                        )}
+                                    </>
                                 )}
                             </div>
 
@@ -661,137 +700,333 @@ const MentorDashboard = () => {
                                                 </tbody>
                                             </table>
                                         </div>
+                                        
+                                        {new Date(selectedContest.startTime) <= new Date() && new Date(selectedContest.endTime) >= new Date() && (
+                                            <div style={{ marginTop: '2rem' }}>
+                                                <h3 style={{ color: 'white', marginBottom: '1rem' }}>Live Leaderboard</h3>
+                                                <div style={{ 
+                                                    background: 'rgba(255, 255, 255, 0.1)',
+                                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                                    borderRadius: '8px',
+                                                    backdropFilter: 'blur(10px)',
+                                                    overflow: 'hidden'
+                                                }}>
+                                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                                        <thead>
+                                                            <tr style={{ background: 'rgba(0, 0, 0, 0.3)' }}>
+                                                                <th style={{ padding: '1rem', textAlign: 'center', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Rank</th>
+                                                                <th style={{ padding: '1rem', textAlign: 'left', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Name</th>
+                                                                <th style={{ padding: '1rem', textAlign: 'center', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Solved</th>
+                                                                <th style={{ padding: '1rem', textAlign: 'center', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Score</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {leaderboard.map((participant, index) => (
+                                                                <tr key={participant.email} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                                                                    <td style={{ padding: '1rem', textAlign: 'center', color: 'white', fontWeight: 'bold' }}>{index + 1}</td>
+                                                                    <td style={{ padding: '1rem', color: 'white' }}>{participant.name}</td>
+                                                                    <td style={{ padding: '1rem', textAlign: 'center', color: '#2ecc71', fontWeight: 'bold' }}>{participant.solved}</td>
+                                                                    <td style={{ padding: '1rem', textAlign: 'center', color: '#3498db', fontWeight: 'bold' }}>{participant.score}</td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             ) : (
                                 <div>
                                     <h2 style={{ color: 'white', marginBottom: '2rem' }}>Contest Management</h2>
+                                    <div style={{ display: 'flex', gap: '1rem', marginBottom: '20px' }}>
+                                        {['upcoming', 'current', 'past', 'create'].map(tab => (
+                                            <button
+                                                key={tab}
+                                                onClick={() => {
+                                                    setContestTab(tab);
+                                                    if (tab === 'create') {
+                                                        setShowCreateContest(true);
+                                                    } else {
+                                                        setShowCreateContest(false);
+                                                    }
+                                                }}
+                                                style={{
+                                                    background: contestTab === tab ? 'white' : 'rgba(255, 255, 255, 0.1)',
+                                                    color: contestTab === tab ? '#000' : 'white',
+                                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                                    padding: '0.5rem 1rem',
+                                                    borderRadius: '6px',
+                                                    cursor: 'pointer',
+                                                    textTransform: 'capitalize',
+                                                    fontWeight: contestTab === tab ? 'bold' : 'normal'
+                                                }}
+                                            >
+                                                {tab}
+                                            </button>
+                                        ))}
+                                    </div>
 
-                            {showCreateContest && (
+                            {contestTab && contestTab === 'create' && (
                                 <div style={{ 
                                     background: 'rgba(255, 255, 255, 0.1)', 
-                                    padding: '2rem', 
-                                    borderRadius: '8px', 
+                                    padding: '2.5rem', 
+                                    borderRadius: '16px', 
                                     border: '1px solid rgba(255, 255, 255, 0.2)',
-                                    marginBottom: '2rem'
+                                    marginBottom: '2rem',
+                                    backdropFilter: 'blur(20px)'
                                 }}>
-                                    <h3 style={{ color: 'white', marginTop: 0 }}>Create New Contest</h3>
+                                    <h3 style={{ color: 'white', marginTop: 0, fontSize: '1.5rem', fontWeight: '600', marginBottom: '2rem' }}>{editingContest ? 'Edit Contest' : 'Create New Contest'}</h3>
                                     <form className="form">
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
                                             <div>
-                                                <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Contest Title</label>
+                                                <label style={{ color: '#e0e0e0', display: 'block', marginBottom: '0.75rem', fontSize: '0.95rem', fontWeight: '500' }}>Contest Title</label>
                                                 <input 
                                                     value={contestForm.title} 
                                                     onChange={e => setContestForm({...contestForm, title: e.target.value})} 
-                                                    placeholder="Contest Title" 
-                                                    style={{ width: '100%', padding: '0.7rem', background: '#222', color: 'white', border: '1px solid #444', borderRadius: '6px', boxSizing: 'border-box' }} 
+                                                    placeholder="Enter contest title" 
+                                                    style={{ 
+                                                        width: '100%', 
+                                                        padding: '0.875rem 1rem', 
+                                                        background: 'rgba(0, 0, 0, 0.4)', 
+                                                        color: 'white', 
+                                                        border: '1px solid rgba(255, 255, 255, 0.3)', 
+                                                        borderRadius: '10px', 
+                                                        boxSizing: 'border-box',
+                                                        fontSize: '0.95rem',
+                                                        transition: 'all 0.3s ease',
+                                                        backdropFilter: 'blur(10px)'
+                                                    }} 
                                                 />
                                             </div>
                                             <div>
-                                                <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Description</label>
+                                                <label style={{ color: '#e0e0e0', display: 'block', marginBottom: '0.75rem', fontSize: '0.95rem', fontWeight: '500' }}>Description</label>
                                                 <input 
                                                     value={contestForm.description} 
                                                     onChange={e => setContestForm({...contestForm, description: e.target.value})} 
-                                                    placeholder="Contest Description" 
-                                                    style={{ width: '100%', padding: '0.7rem', background: '#222', color: 'white', border: '1px solid #444', borderRadius: '6px', boxSizing: 'border-box' }} 
+                                                    placeholder="Brief contest description" 
+                                                    style={{ 
+                                                        width: '100%', 
+                                                        padding: '0.875rem 1rem', 
+                                                        background: 'rgba(0, 0, 0, 0.4)', 
+                                                        color: 'white', 
+                                                        border: '1px solid rgba(255, 255, 255, 0.3)', 
+                                                        borderRadius: '10px', 
+                                                        boxSizing: 'border-box',
+                                                        fontSize: '0.95rem',
+                                                        transition: 'all 0.3s ease',
+                                                        backdropFilter: 'blur(10px)'
+                                                    }} 
                                                 />
                                             </div>
                                         </div>
                                         
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
                                             <div>
-                                                <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Start Time</label>
+                                                <label style={{ color: '#e0e0e0', display: 'block', marginBottom: '0.75rem', fontSize: '0.95rem', fontWeight: '500' }}>Start Time</label>
                                                 <input 
                                                     type="datetime-local" 
                                                     value={contestForm.startTime} 
                                                     onChange={e => setContestForm({...contestForm, startTime: e.target.value})} 
-                                                    style={{ width: '100%', padding: '0.7rem', background: '#222', color: 'white', border: '1px solid #444', borderRadius: '6px', boxSizing: 'border-box' }} 
+                                                    style={{ 
+                                                        width: '100%', 
+                                                        padding: '0.875rem 1rem', 
+                                                        background: 'rgba(0, 0, 0, 0.4)', 
+                                                        color: 'white', 
+                                                        border: '1px solid rgba(255, 255, 255, 0.3)', 
+                                                        borderRadius: '10px', 
+                                                        boxSizing: 'border-box',
+                                                        fontSize: '0.95rem',
+                                                        backdropFilter: 'blur(10px)'
+                                                    }} 
                                                 />
                                             </div>
                                             <div>
-                                                <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>End Time</label>
+                                                <label style={{ color: '#e0e0e0', display: 'block', marginBottom: '0.75rem', fontSize: '0.95rem', fontWeight: '500' }}>End Time</label>
                                                 <input 
                                                     type="datetime-local" 
                                                     value={contestForm.endTime} 
                                                     onChange={e => setContestForm({...contestForm, endTime: e.target.value})} 
-                                                    style={{ width: '100%', padding: '0.7rem', background: '#222', color: 'white', border: '1px solid #444', borderRadius: '6px', boxSizing: 'border-box' }} 
+                                                    style={{ 
+                                                        width: '100%', 
+                                                        padding: '0.875rem 1rem', 
+                                                        background: 'rgba(0, 0, 0, 0.4)', 
+                                                        color: 'white', 
+                                                        border: '1px solid rgba(255, 255, 255, 0.3)', 
+                                                        borderRadius: '10px', 
+                                                        boxSizing: 'border-box',
+                                                        fontSize: '0.95rem',
+                                                        backdropFilter: 'blur(10px)'
+                                                    }} 
                                                 />
                                             </div>
                                         </div>
 
-                                        <div style={{ marginBottom: '1rem' }}>
-                                            <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Problems</label>
-                                            {contestForm.problems.map((problem, index) => (
-                                                <div key={index} style={{ display: 'grid', gridTemplateColumns: '2fr 2fr 1fr auto', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'end' }}>
-                                                    <input 
-                                                        value={problem.title} 
-                                                        onChange={e => {
-                                                            const newProblems = [...contestForm.problems];
-                                                            newProblems[index].title = e.target.value;
-                                                            setContestForm({...contestForm, problems: newProblems});
-                                                        }}
-                                                        placeholder="Problem Title" 
-                                                        style={{ padding: '0.7rem', background: '#222', color: 'white', border: '1px solid #444', borderRadius: '6px' }} 
-                                                    />
-                                                    <input 
-                                                        value={problem.link} 
-                                                        onChange={e => {
-                                                            const newProblems = [...contestForm.problems];
-                                                            newProblems[index].link = e.target.value;
-                                                            setContestForm({...contestForm, problems: newProblems});
-                                                        }}
-                                                        placeholder="Problem Link" 
-                                                        style={{ padding: '0.7rem', background: '#222', color: 'white', border: '1px solid #444', borderRadius: '6px' }} 
-                                                    />
-                                                    <select 
-                                                        value={problem.platform} 
-                                                        onChange={e => {
-                                                            const newProblems = [...contestForm.problems];
-                                                            newProblems[index].platform = e.target.value;
-                                                            setContestForm({...contestForm, problems: newProblems});
-                                                        }}
-                                                        style={{ padding: '0.7rem', background: '#222', color: 'white', border: '1px solid #444', borderRadius: '6px' }}
-                                                    >
+                                        <div style={{ marginBottom: '2rem' }}>
+                                            <label style={{ color: '#e0e0e0', display: 'block', marginBottom: '1rem', fontSize: '1.1rem', fontWeight: '600' }}>Problems</label>
+                                            <div style={{ 
+                                                background: 'rgba(255, 255, 255, 0.05)', 
+                                                padding: '1.5rem', 
+                                                borderRadius: '12px', 
+                                                border: '1px solid rgba(255, 255, 255, 0.2)'
+                                            }}>
+                                                {contestForm.problems.map((problem, index) => (
+                                                    <div key={index} style={{ 
+                                                        display: 'grid', 
+                                                        gridTemplateColumns: '2fr 2fr 1fr auto', 
+                                                        gap: '1rem', 
+                                                        marginBottom: index < contestForm.problems.length - 1 ? '1rem' : '0', 
+                                                        alignItems: 'end',
+                                                        padding: '1rem',
+                                                        background: 'rgba(255, 255, 255, 0.05)',
+                                                        borderRadius: '8px',
+                                                        border: '1px solid rgba(255, 255, 255, 0.1)'
+                                                    }}>
+                                                        <input 
+                                                            value={problem.title} 
+                                                            onChange={e => {
+                                                                const newProblems = [...contestForm.problems];
+                                                                newProblems[index].title = e.target.value;
+                                                                setContestForm({...contestForm, problems: newProblems});
+                                                            }}
+                                                            placeholder="Problem Title" 
+                                                            style={{ 
+                                                                padding: '0.875rem 1rem', 
+                                                                background: 'rgba(0, 0, 0, 0.4)', 
+                                                                color: 'white', 
+                                                                border: '1px solid rgba(255, 255, 255, 0.3)', 
+                                                                borderRadius: '8px',
+                                                                fontSize: '0.9rem',
+                                                                backdropFilter: 'blur(10px)'
+                                                            }} 
+                                                        />
+                                                        <input 
+                                                            value={problem.link} 
+                                                            onChange={e => {
+                                                                const newProblems = [...contestForm.problems];
+                                                                newProblems[index].link = e.target.value;
+                                                                setContestForm({...contestForm, problems: newProblems});
+                                                            }}
+                                                            placeholder="Problem Link" 
+                                                            style={{ 
+                                                                padding: '0.875rem 1rem', 
+                                                                background: 'rgba(0, 0, 0, 0.4)', 
+                                                                color: 'white', 
+                                                                border: '1px solid rgba(255, 255, 255, 0.3)', 
+                                                                borderRadius: '8px',
+                                                                fontSize: '0.9rem',
+                                                                backdropFilter: 'blur(10px)'
+                                                            }} 
+                                                        />
+                                                        <select 
+                                                            value={problem.platform} 
+                                                            onChange={e => {
+                                                                const newProblems = [...contestForm.problems];
+                                                                newProblems[index].platform = e.target.value;
+                                                                setContestForm({...contestForm, problems: newProblems});
+                                                            }}
+                                                            style={{ 
+                                                                padding: '0.875rem 1rem', 
+                                                                background: 'rgba(0, 0, 0, 0.4)', 
+                                                                color: 'white', 
+                                                                border: '1px solid rgba(255, 255, 255, 0.3)', 
+                                                                borderRadius: '8px',
+                                                                fontSize: '0.9rem',
+                                                                backdropFilter: 'blur(10px)'
+                                                            }}
+                                                        >
                                                         <option value="Codeforces">Codeforces</option>
                                                         <option value="LeetCode">LeetCode</option>
                                                         <option value="AtCoder">AtCoder</option>
                                                         <option value="Other">Other</option>
                                                     </select>
-                                                    {contestForm.problems.length > 1 && (
-                                                        <button 
-                                                            type="button" 
-                                                            onClick={() => {
-                                                                const newProblems = contestForm.problems.filter((_, i) => i !== index);
-                                                                setContestForm({...contestForm, problems: newProblems});
-                                                            }}
-                                                            style={{ padding: '0.7rem', background: '#e74c3c', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
-                                                        >
-                                                            ×
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            ))}
-                                            <button 
-                                                type="button" 
-                                                onClick={() => setContestForm({...contestForm, problems: [...contestForm.problems, { title: '', link: '', platform: 'Codeforces' }]})}
-                                                style={{ padding: '0.5rem 1rem', background: 'rgba(255, 255, 255, 0.1)', color: 'white', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '6px', cursor: 'pointer', marginTop: '0.5rem' }}
-                                            >
-                                                + Add Problem
-                                            </button>
+                                                        {contestForm.problems.length > 1 && (
+                                                            <button 
+                                                                type="button" 
+                                                                onClick={() => {
+                                                                    const newProblems = contestForm.problems.filter((_, i) => i !== index);
+                                                                    setContestForm({...contestForm, problems: newProblems});
+                                                                }}
+                                                                style={{ 
+                                                                    padding: '0.875rem', 
+                                                                    background: 'linear-gradient(135deg, #e74c3c, #c0392b)', 
+                                                                    color: 'white', 
+                                                                    border: 'none', 
+                                                                    borderRadius: '8px', 
+                                                                    cursor: 'pointer',
+                                                                    fontSize: '1rem',
+                                                                    fontWeight: 'bold',
+                                                                    transition: 'all 0.3s ease',
+                                                                    boxShadow: '0 4px 12px rgba(231, 76, 60, 0.3)'
+                                                                }}
+                                                            >
+                                                                ×
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => setContestForm({...contestForm, problems: [...contestForm.problems, { title: '', link: '', platform: 'Codeforces' }]})}
+                                                    style={{ 
+                                                        padding: '0.875rem 1.5rem', 
+                                                        background: 'linear-gradient(135deg, rgba(52, 152, 219, 0.3), rgba(41, 128, 185, 0.3))', 
+                                                        color: '#3498db', 
+                                                        border: '1px solid #3498db', 
+                                                        borderRadius: '10px', 
+                                                        cursor: 'pointer', 
+                                                        marginTop: '1rem',
+                                                        fontSize: '0.95rem',
+                                                        fontWeight: '500',
+                                                        transition: 'all 0.3s ease',
+                                                        backdropFilter: 'blur(10px)'
+                                                    }}
+                                                >
+                                                    + Add Problem
+                                                </button>
+                                            </div>
                                         </div>
 
-                                        <div style={{ display: 'flex', gap: '1rem' }}>
+                                        <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
                                             <button 
                                                 type="button" 
                                                 onClick={handleCreateContest}
-                                                style={{ background: 'white', color: '#000', fontWeight: 'bold', padding: '0.7rem 1.5rem', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+                                                style={{ 
+                                                    background: 'white', 
+                                                    color: '#000', 
+                                                    fontWeight: '600', 
+                                                    padding: '0.875rem 2rem', 
+                                                    border: 'none', 
+                                                    borderRadius: '12px', 
+                                                    cursor: 'pointer',
+                                                    fontSize: '0.95rem'
+                                                }}
                                             >
-                                                Create Contest
+                                                {editingContest ? 'Update Contest' : 'Create Contest'}
                                             </button>
                                             <button 
                                                 type="button" 
-                                                onClick={() => setShowCreateContest(false)}
-                                                style={{ background: 'transparent', color: 'white', padding: '0.7rem 1.5rem', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '6px', cursor: 'pointer' }}
+                                                onClick={() => {
+                                                    setShowCreateContest(false);
+                                                    setEditingContest(null);
+                                                    setContestForm({
+                                                        title: '',
+                                                        description: '',
+                                                        startTime: '',
+                                                        endTime: '',
+                                                        problems: [{ title: '', link: '', platform: 'Codeforces' }]
+                                                    });
+                                                }}
+                                                style={{ 
+                                                    background: 'rgba(255, 255, 255, 0.1)', 
+                                                    color: 'white', 
+                                                    padding: '0.875rem 2rem', 
+                                                    border: '1px solid rgba(255, 255, 255, 0.2)', 
+                                                    borderRadius: '12px', 
+                                                    cursor: 'pointer',
+                                                    fontSize: '0.95rem',
+                                                    fontWeight: '500'
+                                                }}
                                             >
                                                 Cancel
                                             </button>
@@ -800,11 +1035,13 @@ const MentorDashboard = () => {
                                 </div>
                             )}
 
+                            {contestTab !== 'create' && (
                             <div style={{ 
                                 background: 'rgba(255, 255, 255, 0.1)', 
                                 border: '1px solid rgba(255, 255, 255, 0.2)', 
-                                borderRadius: '8px', 
-                                overflow: 'hidden'
+                                borderRadius: '16px', 
+                                overflow: 'hidden',
+                                backdropFilter: 'blur(20px)'
                             }}>
                                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                     <thead>
@@ -817,14 +1054,30 @@ const MentorDashboard = () => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {contests.length === 0 ? (
+                                        {contests.filter(contest => {
+                                            const now = new Date();
+                                            const start = new Date(contest.startTime);
+                                            const end = new Date(contest.endTime);
+                                            if (contestTab === 'upcoming') return start > now;
+                                            if (contestTab === 'current') return start <= now && end >= now;
+                                            if (contestTab === 'past') return end < now;
+                                            return false;
+                                        }).length === 0 ? (
                                             <tr>
                                                 <td colSpan="5" style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
-                                                    No contests created yet. Click "Create Contest" to get started.
+                                                    No {contestTab} contests found.
                                                 </td>
                                             </tr>
                                         ) : (
-                                            contests.map(contest => (
+                                            contests.filter(contest => {
+                                                const now = new Date();
+                                                const start = new Date(contest.startTime);
+                                                const end = new Date(contest.endTime);
+                                                if (contestTab === 'upcoming') return start > now;
+                                                if (contestTab === 'current') return start <= now && end >= now;
+                                                if (contestTab === 'past') return end < now;
+                                                return false;
+                                            }).map(contest => (
                                                 <tr key={contest._id} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
                                                     <td style={{ padding: '1rem', color: 'white' }}>
                                                         <div>
@@ -843,15 +1096,23 @@ const MentorDashboard = () => {
                                                             padding: '0.25rem 0.75rem', 
                                                             borderRadius: '12px', 
                                                             fontSize: '0.8rem',
-                                                            background: contest.status === 'Active' ? '#2ecc71' : contest.status === 'Upcoming' ? '#f39c12' : '#95a5a6',
+                                                            background: contestTab === 'current' ? '#2ecc71' : contestTab === 'upcoming' ? '#f39c12' : '#95a5a6',
                                                             color: 'white'
                                                         }}>
-                                                            {contest.status || 'Upcoming'}
+                                                            {contestTab === 'current' ? 'Running' : contestTab === 'upcoming' ? 'Upcoming' : 'Ended'}
                                                         </span>
                                                     </td>
                                                     <td style={{ padding: '1rem', textAlign: 'center' }}>
                                                         <button 
-                                                            onClick={() => setSelectedContest(contest)}
+                                                            onClick={() => {
+                                                                setSelectedContest(contest);
+                                                                const now = new Date();
+                                                                const start = new Date(contest.startTime);
+                                                                const end = new Date(contest.endTime);
+                                                                if (start <= now && end >= now) {
+                                                                    fetchLeaderboard(contest._id);
+                                                                }
+                                                            }}
                                                             style={{ 
                                                             background: 'rgba(255, 255, 255, 0.1)', 
                                                             color: 'white', 
@@ -859,9 +1120,33 @@ const MentorDashboard = () => {
                                                             padding: '0.5rem 1rem', 
                                                             borderRadius: '6px', 
                                                             cursor: 'pointer',
-                                                            fontSize: '0.8rem'
+                                                            fontSize: '0.8rem',
+                                                            marginRight: '0.5rem'
                                                         }}>
                                                             View
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => {
+                                                                setEditingContest(contest);
+                                                                setContestForm({
+                                                                    title: contest.contestName,
+                                                                    description: contest.description,
+                                                                    startTime: new Date(contest.startTime).toISOString().slice(0, 16),
+                                                                    endTime: new Date(contest.endTime).toISOString().slice(0, 16),
+                                                                    problems: contest.problems
+                                                                });
+                                                                setShowCreateContest(true);
+                                                            }}
+                                                            style={{ 
+                                                            background: 'rgba(52, 152, 219, 0.2)', 
+                                                            color: '#3498db', 
+                                                            border: '1px solid #3498db', 
+                                                            padding: '0.5rem 1rem', 
+                                                            borderRadius: '6px', 
+                                                            cursor: 'pointer',
+                                                            fontSize: '0.8rem'
+                                                        }}>
+                                                            Edit
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -870,6 +1155,7 @@ const MentorDashboard = () => {
                                     </tbody>
                                 </table>
                             </div>
+                            )}
                                 </div>
                             )}
                         </div>

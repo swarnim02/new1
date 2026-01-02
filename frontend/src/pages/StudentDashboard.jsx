@@ -26,6 +26,7 @@ const StudentDashboard = () => {
     const [globalContests, setGlobalContests] = useState([]);
     const [selectedContest, setSelectedContest] = useState(null);
     const [contestTab, setContestTab] = useState('upcoming');
+    const [leaderboard, setLeaderboard] = useState([]);
 
     useEffect(() => {
         fetchData();
@@ -66,6 +67,15 @@ const StudentDashboard = () => {
             setGlobalContests(res.data.contests || []);
         } catch (error) {
             console.error('Error fetching contests:', error);
+        }
+    };
+
+    const fetchLeaderboard = async (contestId) => {
+        try {
+            const res = await studentAPI.getContestLeaderboard(contestId);
+            setLeaderboard(res.data.leaderboard || []);
+        } catch (error) {
+            console.error('Error fetching leaderboard:', error);
         }
     };
 
@@ -586,7 +596,15 @@ const StudentDashboard = () => {
                                                         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                                                             <button 
                                                                 className="btn btn-primary btn-sm"
-                                                                onClick={() => setSelectedContest(contest)}
+                                                                onClick={() => {
+                                                                    setSelectedContest(contest);
+                                                                    const now = new Date();
+                                                                    const start = new Date(contest.startTime);
+                                                                    const end = new Date(contest.endTime);
+                                                                    if (start <= now && end >= now) {
+                                                                        fetchLeaderboard(contest._id);
+                                                                    }
+                                                                }}
                                                             >
                                                                 View
                                                             </button>
@@ -622,43 +640,81 @@ const StudentDashboard = () => {
                                         <span>End: {new Date(selectedContest.endTime).toLocaleString()}</span>
                                     </div>
                                     
-                                    <h3 style={{ color: 'white', marginBottom: '1rem' }}>Problems</h3>
-                                    <div style={{ 
-                                        background: 'rgba(255, 255, 255, 0.1)',
-                                        border: '1px solid rgba(255, 255, 255, 0.2)',
-                                        borderRadius: '8px',
-                                        backdropFilter: 'blur(10px)',
-                                        overflow: 'hidden'
-                                    }}>
-                                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                            <thead>
-                                                <tr style={{ background: 'rgba(0, 0, 0, 0.3)' }}>
-                                                    <th style={{ padding: '1rem', textAlign: 'left', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Order</th>
-                                                    <th style={{ padding: '1rem', textAlign: 'left', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Title</th>
-                                                    <th style={{ padding: '1rem', textAlign: 'center', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Platform</th>
-                                                    <th style={{ padding: '1rem', textAlign: 'center', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {selectedContest.problems.map((problem, index) => (
-                                                    <tr key={problem._id} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
-                                                        <td style={{ padding: '1rem', color: 'white', fontWeight: 'bold' }}>{index + 1}</td>
-                                                        <td style={{ padding: '1rem', color: 'white' }}>{problem.title}</td>
-                                                        <td style={{ padding: '1rem', textAlign: 'center', color: '#e67e22', fontWeight: 'bold' }}>{problem.platform}</td>
-                                                        <td style={{ padding: '1rem', textAlign: 'center' }}>
-                                                            {new Date(selectedContest.startTime) <= new Date() && new Date(selectedContest.endTime) >= new Date() ? (
-                                                                <a href={problem.link} target="_blank" rel="noopener noreferrer" className="btn btn-secondary btn-sm">
-                                                                    Open Problem
-                                                                </a>
-                                                            ) : (
-                                                                <span style={{ color: '#666', fontSize: '0.9rem' }}>Not available</span>
-                                                            )}
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                    {new Date(selectedContest.startTime) > new Date() ? (
+                                        <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
+                                            Contest will be available at start time
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <h3 style={{ color: 'white', marginBottom: '1rem' }}>Problems</h3>
+                                            <div style={{ 
+                                                background: 'rgba(255, 255, 255, 0.1)',
+                                                border: '1px solid rgba(255, 255, 255, 0.2)',
+                                                borderRadius: '8px',
+                                                backdropFilter: 'blur(10px)',
+                                                overflow: 'hidden'
+                                            }}>
+                                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                                    <thead>
+                                                        <tr style={{ background: 'rgba(0, 0, 0, 0.3)' }}>
+                                                            <th style={{ padding: '1rem', textAlign: 'left', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Order</th>
+                                                            <th style={{ padding: '1rem', textAlign: 'left', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Title</th>
+                                                            <th style={{ padding: '1rem', textAlign: 'center', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Platform</th>
+                                                            <th style={{ padding: '1rem', textAlign: 'center', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {selectedContest.problems.map((problem, index) => (
+                                                            <tr key={problem._id} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                                                                <td style={{ padding: '1rem', color: 'white', fontWeight: 'bold' }}>{index + 1}</td>
+                                                                <td style={{ padding: '1rem', color: 'white' }}>{problem.title}</td>
+                                                                <td style={{ padding: '1rem', textAlign: 'center', color: '#e67e22', fontWeight: 'bold' }}>{problem.platform}</td>
+                                                                <td style={{ padding: '1rem', textAlign: 'center' }}>
+                                                                    <a href={problem.link} target="_blank" rel="noopener noreferrer" className="btn btn-secondary btn-sm">
+                                                                        Open Problem
+                                                                    </a>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            
+                                            {new Date(selectedContest.startTime) <= new Date() && new Date(selectedContest.endTime) >= new Date() && (
+                                                <div style={{ marginTop: '2rem' }}>
+                                                    <h3 style={{ color: 'white', marginBottom: '1rem' }}>Live Leaderboard</h3>
+                                                    <div style={{ 
+                                                        background: 'rgba(255, 255, 255, 0.1)',
+                                                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                                                        borderRadius: '8px',
+                                                        backdropFilter: 'blur(10px)',
+                                                        overflow: 'hidden'
+                                                    }}>
+                                                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                                            <thead>
+                                                                <tr style={{ background: 'rgba(0, 0, 0, 0.3)' }}>
+                                                                    <th style={{ padding: '1rem', textAlign: 'center', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Rank</th>
+                                                                    <th style={{ padding: '1rem', textAlign: 'left', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Name</th>
+                                                                    <th style={{ padding: '1rem', textAlign: 'center', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Solved</th>
+                                                                    <th style={{ padding: '1rem', textAlign: 'center', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Score</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {leaderboard.map((participant, index) => (
+                                                                    <tr key={participant.email} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                                                                        <td style={{ padding: '1rem', textAlign: 'center', color: 'white', fontWeight: 'bold' }}>{index + 1}</td>
+                                                                        <td style={{ padding: '1rem', color: 'white' }}>{participant.name}</td>
+                                                                        <td style={{ padding: '1rem', textAlign: 'center', color: '#2ecc71', fontWeight: 'bold' }}>{participant.solved}</td>
+                                                                        <td style={{ padding: '1rem', textAlign: 'center', color: '#3498db', fontWeight: 'bold' }}>{participant.score}</td>
+                                                                    </tr>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>

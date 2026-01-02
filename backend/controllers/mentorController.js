@@ -520,6 +520,44 @@ const getGlobalContests = async (req, res) => {
     }
 };
 
+/**
+ * @desc    Update a global contest
+ * @route   PUT /api/mentor/global-contests/:contestId
+ * @access  Private (Mentor only)
+ */
+const updateGlobalContest = async (req, res) => {
+    const { contestId } = req.params;
+    const { title, description, startTime, endTime, problems } = req.body;
+
+    try {
+        const contest = await Contest.findByIdAndUpdate(
+            contestId,
+            {
+                contestName: title,
+                description,
+                startTime: new Date(startTime),
+                endTime: new Date(endTime),
+                problems: problems.map((p, index) => ({
+                    order: String.fromCharCode(65 + index),
+                    title: p.title,
+                    link: p.link,
+                    platform: p.platform
+                }))
+            },
+            { new: true }
+        ).populate('mentorId', 'name email');
+
+        if (!contest) {
+            return res.status(404).json({ message: 'Contest not found' });
+        }
+
+        res.status(200).json(contest);
+    } catch (error) {
+        console.error('Update contest error:', error.message);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 module.exports = {
     createGroup,
     getMyGroups,
@@ -527,6 +565,7 @@ module.exports = {
     createContest,
     createGlobalContest,
     getGlobalContests,
+    updateGlobalContest,
     viewStudentProgress,
     addGroupProblem,
     getGroupStats,
