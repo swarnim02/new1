@@ -13,6 +13,16 @@ const MentorDashboard = () => {
     const [selectedSet, setSelectedSet] = useState(null);
     const [activeSection, setActiveSection] = useState('main');
     const [fetchingStats, setFetchingStats] = useState(false);
+    const [contests, setContests] = useState([]);
+    const [selectedContest, setSelectedContest] = useState(null);
+    const [showCreateContest, setShowCreateContest] = useState(false);
+    const [contestForm, setContestForm] = useState({
+        title: '',
+        description: '',
+        startTime: '',
+        endTime: '',
+        problems: [{ title: '', link: '', platform: 'Codeforces' }]
+    });
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [showAddGroup, setShowAddGroup] = useState(false);
     const [showAddSet, setShowAddSet] = useState(false);
@@ -25,7 +35,20 @@ const MentorDashboard = () => {
 
     useEffect(() => {
         fetchGroups();
-    }, []);
+        if (activeSection === 'contests') {
+            fetchContests();
+        }
+    }, [activeSection]);
+
+    const fetchContests = async () => {
+        try {
+            const response = await mentorAPI.getGlobalContests();
+            setContests(response.data.contests || []);
+        } catch (error) {
+            console.error('Error fetching contests:', error);
+            setContests([]);
+        }
+    };
 
     const fetchGroups = async () => {
         try {
@@ -87,6 +110,25 @@ const MentorDashboard = () => {
             alert('Error fetching contest counts');
         } finally {
             setFetchingStats(false);
+        }
+    };
+
+    const handleCreateContest = async (e) => {
+        e.preventDefault();
+        try {
+            await mentorAPI.createGlobalContest(contestForm);
+            setContestForm({
+                title: '',
+                description: '',
+                startTime: '',
+                endTime: '',
+                problems: [{ title: '', link: '', platform: 'Codeforces' }]
+            });
+            setShowCreateContest(false);
+            fetchContests();
+            alert('Contest created successfully!');
+        } catch (error) {
+            alert(error.response?.data?.message || 'Error creating contest');
         }
     };
 
@@ -256,6 +298,17 @@ const MentorDashboard = () => {
                                 >
                                     <h2 style={{ margin: '0 0 1rem 0', color: 'white' }}>Student Performance</h2>
                                     <p style={{ color: '#aaa' }}>View detailed statistics and progress of students in your groups</p>
+                                </div>
+                                
+                                <div 
+                                    className="queue-item" 
+                                    style={{ cursor: 'pointer', textAlign: 'center', padding: '2rem', background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '8px', transition: 'all 0.3s ease' }}
+                                    onClick={() => setActiveSection('contests')}
+                                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)'}
+                                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
+                                >
+                                    <h2 style={{ margin: '0 0 1rem 0', color: 'white' }}>Contests</h2>
+                                    <p style={{ color: '#aaa' }}>Schedule and manage contests for all students</p>
                                 </div>
                             </div>
                         </div>
@@ -508,6 +561,315 @@ const MentorDashboard = () => {
                                             </tbody>
                                         </table>
                                     </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {activeSection === 'contests' && (
+                        <div className="animate-fade-in">
+                            <div style={{ marginBottom: '2rem' }}>
+                                <button 
+                                    className="btn btn-secondary btn-sm" 
+                                    onClick={() => setActiveSection('main')}
+                                >
+                                    ← Back to Main
+                                </button>
+                                {!selectedContest && (
+                                    <button 
+                                        className="btn btn-primary" 
+                                        onClick={() => setShowCreateContest(true)}
+                                        style={{ marginLeft: '1rem' }}
+                                    >
+                                        Create Contest
+                                    </button>
+                                )}
+                            </div>
+
+                            {selectedContest ? (
+                                <div>
+                                    <button 
+                                        className="btn btn-secondary btn-sm" 
+                                        onClick={() => setSelectedContest(null)}
+                                        style={{ marginBottom: '2rem' }}
+                                    >
+                                        ← Back to Contests
+                                    </button>
+                                    
+                                    <div style={{ 
+                                        background: 'rgba(255, 255, 255, 0.1)', 
+                                        padding: '2rem', 
+                                        borderRadius: '8px', 
+                                        border: '1px solid rgba(255, 255, 255, 0.2)'
+                                    }}>
+                                        <h2 style={{ color: 'white', marginTop: 0 }}>{selectedContest.contestName}</h2>
+                                        <p style={{ color: '#aaa', marginBottom: '2rem' }}>{selectedContest.description}</p>
+                                        
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
+                                            <div>
+                                                <h4 style={{ color: 'white', marginBottom: '0.5rem' }}>Start Time</h4>
+                                                <p style={{ color: '#007bff' }}>{new Date(selectedContest.startTime).toLocaleString()}</p>
+                                            </div>
+                                            <div>
+                                                <h4 style={{ color: 'white', marginBottom: '0.5rem' }}>End Time</h4>
+                                                <p style={{ color: '#007bff' }}>{new Date(selectedContest.endTime).toLocaleString()}</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <h3 style={{ color: 'white', marginBottom: '1rem' }}>Problems ({selectedContest.problems?.length || 0})</h3>
+                                        <div style={{ 
+                                            background: 'rgba(255, 255, 255, 0.1)', 
+                                            border: '1px solid rgba(255, 255, 255, 0.2)', 
+                                            borderRadius: '8px', 
+                                            overflow: 'hidden'
+                                        }}>
+                                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                                <thead>
+                                                    <tr style={{ background: 'rgba(0, 0, 0, 0.3)' }}>
+                                                        <th style={{ padding: '1rem', textAlign: 'center', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Order</th>
+                                                        <th style={{ padding: '1rem', textAlign: 'left', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Title</th>
+                                                        <th style={{ padding: '1rem', textAlign: 'center', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Platform</th>
+                                                        <th style={{ padding: '1rem', textAlign: 'center', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Link</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {selectedContest.problems?.map(problem => (
+                                                        <tr key={problem.order} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                                                            <td style={{ padding: '1rem', textAlign: 'center', color: 'white', fontWeight: 'bold', fontSize: '1.2rem' }}>{problem.order}</td>
+                                                            <td style={{ padding: '1rem', color: 'white' }}>{problem.title}</td>
+                                                            <td style={{ padding: '1rem', textAlign: 'center', color: '#e67e22', fontWeight: 'bold' }}>{problem.platform}</td>
+                                                            <td style={{ padding: '1rem', textAlign: 'center' }}>
+                                                                <a 
+                                                                    href={problem.link} 
+                                                                    target="_blank" 
+                                                                    rel="noopener noreferrer" 
+                                                                    style={{ 
+                                                                        color: '#007bff', 
+                                                                        textDecoration: 'none',
+                                                                        padding: '0.5rem 1rem',
+                                                                        border: '1px solid #007bff',
+                                                                        borderRadius: '6px',
+                                                                        fontSize: '0.8rem',
+                                                                        background: 'rgba(0, 123, 255, 0.1)'
+                                                                    }}
+                                                                >
+                                                                    Open Problem
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div>
+                                    <h2 style={{ color: 'white', marginBottom: '2rem' }}>Contest Management</h2>
+
+                            {showCreateContest && (
+                                <div style={{ 
+                                    background: 'rgba(255, 255, 255, 0.1)', 
+                                    padding: '2rem', 
+                                    borderRadius: '8px', 
+                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                    marginBottom: '2rem'
+                                }}>
+                                    <h3 style={{ color: 'white', marginTop: 0 }}>Create New Contest</h3>
+                                    <form className="form">
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                                            <div>
+                                                <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Contest Title</label>
+                                                <input 
+                                                    value={contestForm.title} 
+                                                    onChange={e => setContestForm({...contestForm, title: e.target.value})} 
+                                                    placeholder="Contest Title" 
+                                                    style={{ width: '100%', padding: '0.7rem', background: '#222', color: 'white', border: '1px solid #444', borderRadius: '6px', boxSizing: 'border-box' }} 
+                                                />
+                                            </div>
+                                            <div>
+                                                <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Description</label>
+                                                <input 
+                                                    value={contestForm.description} 
+                                                    onChange={e => setContestForm({...contestForm, description: e.target.value})} 
+                                                    placeholder="Contest Description" 
+                                                    style={{ width: '100%', padding: '0.7rem', background: '#222', color: 'white', border: '1px solid #444', borderRadius: '6px', boxSizing: 'border-box' }} 
+                                                />
+                                            </div>
+                                        </div>
+                                        
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                                            <div>
+                                                <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Start Time</label>
+                                                <input 
+                                                    type="datetime-local" 
+                                                    value={contestForm.startTime} 
+                                                    onChange={e => setContestForm({...contestForm, startTime: e.target.value})} 
+                                                    style={{ width: '100%', padding: '0.7rem', background: '#222', color: 'white', border: '1px solid #444', borderRadius: '6px', boxSizing: 'border-box' }} 
+                                                />
+                                            </div>
+                                            <div>
+                                                <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>End Time</label>
+                                                <input 
+                                                    type="datetime-local" 
+                                                    value={contestForm.endTime} 
+                                                    onChange={e => setContestForm({...contestForm, endTime: e.target.value})} 
+                                                    style={{ width: '100%', padding: '0.7rem', background: '#222', color: 'white', border: '1px solid #444', borderRadius: '6px', boxSizing: 'border-box' }} 
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div style={{ marginBottom: '1rem' }}>
+                                            <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Problems</label>
+                                            {contestForm.problems.map((problem, index) => (
+                                                <div key={index} style={{ display: 'grid', gridTemplateColumns: '2fr 2fr 1fr auto', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'end' }}>
+                                                    <input 
+                                                        value={problem.title} 
+                                                        onChange={e => {
+                                                            const newProblems = [...contestForm.problems];
+                                                            newProblems[index].title = e.target.value;
+                                                            setContestForm({...contestForm, problems: newProblems});
+                                                        }}
+                                                        placeholder="Problem Title" 
+                                                        style={{ padding: '0.7rem', background: '#222', color: 'white', border: '1px solid #444', borderRadius: '6px' }} 
+                                                    />
+                                                    <input 
+                                                        value={problem.link} 
+                                                        onChange={e => {
+                                                            const newProblems = [...contestForm.problems];
+                                                            newProblems[index].link = e.target.value;
+                                                            setContestForm({...contestForm, problems: newProblems});
+                                                        }}
+                                                        placeholder="Problem Link" 
+                                                        style={{ padding: '0.7rem', background: '#222', color: 'white', border: '1px solid #444', borderRadius: '6px' }} 
+                                                    />
+                                                    <select 
+                                                        value={problem.platform} 
+                                                        onChange={e => {
+                                                            const newProblems = [...contestForm.problems];
+                                                            newProblems[index].platform = e.target.value;
+                                                            setContestForm({...contestForm, problems: newProblems});
+                                                        }}
+                                                        style={{ padding: '0.7rem', background: '#222', color: 'white', border: '1px solid #444', borderRadius: '6px' }}
+                                                    >
+                                                        <option value="Codeforces">Codeforces</option>
+                                                        <option value="LeetCode">LeetCode</option>
+                                                        <option value="AtCoder">AtCoder</option>
+                                                        <option value="Other">Other</option>
+                                                    </select>
+                                                    {contestForm.problems.length > 1 && (
+                                                        <button 
+                                                            type="button" 
+                                                            onClick={() => {
+                                                                const newProblems = contestForm.problems.filter((_, i) => i !== index);
+                                                                setContestForm({...contestForm, problems: newProblems});
+                                                            }}
+                                                            style={{ padding: '0.7rem', background: '#e74c3c', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+                                                        >
+                                                            ×
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            ))}
+                                            <button 
+                                                type="button" 
+                                                onClick={() => setContestForm({...contestForm, problems: [...contestForm.problems, { title: '', link: '', platform: 'Codeforces' }]})}
+                                                style={{ padding: '0.5rem 1rem', background: 'rgba(255, 255, 255, 0.1)', color: 'white', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '6px', cursor: 'pointer', marginTop: '0.5rem' }}
+                                            >
+                                                + Add Problem
+                                            </button>
+                                        </div>
+
+                                        <div style={{ display: 'flex', gap: '1rem' }}>
+                                            <button 
+                                                type="button" 
+                                                onClick={handleCreateContest}
+                                                style={{ background: 'white', color: '#000', fontWeight: 'bold', padding: '0.7rem 1.5rem', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+                                            >
+                                                Create Contest
+                                            </button>
+                                            <button 
+                                                type="button" 
+                                                onClick={() => setShowCreateContest(false)}
+                                                style={{ background: 'transparent', color: 'white', padding: '0.7rem 1.5rem', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '6px', cursor: 'pointer' }}
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            )}
+
+                            <div style={{ 
+                                background: 'rgba(255, 255, 255, 0.1)', 
+                                border: '1px solid rgba(255, 255, 255, 0.2)', 
+                                borderRadius: '8px', 
+                                overflow: 'hidden'
+                            }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                    <thead>
+                                        <tr style={{ background: 'rgba(0, 0, 0, 0.3)' }}>
+                                            <th style={{ padding: '1rem', textAlign: 'left', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Contest</th>
+                                            <th style={{ padding: '1rem', textAlign: 'center', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Start Time</th>
+                                            <th style={{ padding: '1rem', textAlign: 'center', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>End Time</th>
+                                            <th style={{ padding: '1rem', textAlign: 'center', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Status</th>
+                                            <th style={{ padding: '1rem', textAlign: 'center', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {contests.length === 0 ? (
+                                            <tr>
+                                                <td colSpan="5" style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+                                                    No contests created yet. Click "Create Contest" to get started.
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            contests.map(contest => (
+                                                <tr key={contest._id} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                                                    <td style={{ padding: '1rem', color: 'white' }}>
+                                                        <div>
+                                                            <div style={{ fontWeight: 'bold' }}>{contest.title}</div>
+                                                            <div style={{ fontSize: '0.8rem', color: '#666' }}>{contest.description}</div>
+                                                        </div>
+                                                    </td>
+                                                    <td style={{ padding: '1rem', textAlign: 'center', color: '#007bff' }}>
+                                                        {new Date(contest.startTime).toLocaleString()}
+                                                    </td>
+                                                    <td style={{ padding: '1rem', textAlign: 'center', color: '#007bff' }}>
+                                                        {new Date(contest.endTime).toLocaleString()}
+                                                    </td>
+                                                    <td style={{ padding: '1rem', textAlign: 'center' }}>
+                                                        <span style={{ 
+                                                            padding: '0.25rem 0.75rem', 
+                                                            borderRadius: '12px', 
+                                                            fontSize: '0.8rem',
+                                                            background: contest.status === 'Active' ? '#2ecc71' : contest.status === 'Upcoming' ? '#f39c12' : '#95a5a6',
+                                                            color: 'white'
+                                                        }}>
+                                                            {contest.status || 'Upcoming'}
+                                                        </span>
+                                                    </td>
+                                                    <td style={{ padding: '1rem', textAlign: 'center' }}>
+                                                        <button 
+                                                            onClick={() => setSelectedContest(contest)}
+                                                            style={{ 
+                                                            background: 'rgba(255, 255, 255, 0.1)', 
+                                                            color: 'white', 
+                                                            border: '1px solid rgba(255, 255, 255, 0.2)', 
+                                                            padding: '0.5rem 1rem', 
+                                                            borderRadius: '6px', 
+                                                            cursor: 'pointer',
+                                                            fontSize: '0.8rem'
+                                                        }}>
+                                                            View
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                                 </div>
                             )}
                         </div>

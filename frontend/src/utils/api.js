@@ -24,6 +24,8 @@ export const mentorAPI = {
     getGroups: () => api.get('/mentor/groups'),
     addStudents: (groupId, emails) => api.post(`/mentor/add-students/${groupId}`, { studentEmails: emails }),
     createContest: (groupId, data) => api.post(`/mentor/create-contest/${groupId}`, data),
+    createGlobalContest: (data) => api.post('/mentor/create-global-contest', data),
+    getGlobalContests: () => api.get('/mentor/global-contests'),
     viewProgress: (groupId, contestId) => api.get(`/mentor/progress/${groupId}/${contestId}`),
     addGroupProblem: (groupId, data) => api.post(`/mentor/group-problem/${groupId}`, data),
     getGroupStats: (groupId) => api.get(`/mentor/group-stats/${groupId}`),
@@ -44,7 +46,9 @@ export const studentAPI = {
     markSolved: (problemStatusId) => api.put(`/student/mark-solved/${problemStatusId}`),
     getMyStats: () => api.get('/student/my-stats'),
     getGroupProblems: () => api.get('/student/group-problems'),
-    submitGroupSolve: (problemId, data) => api.post(`/student/submit-solve/${problemId}`, data)
+    submitGroupSolve: (problemId, data) => api.post(`/student/submit-solve/${problemId}`, data),
+    getGlobalContests: () => api.get('/student/global-contests'),
+    registerForContest: (contestId) => api.post(`/student/register-contest/${contestId}`)
 };
 
 export default api;

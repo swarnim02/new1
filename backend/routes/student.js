@@ -12,7 +12,9 @@ const {
     verifyQueue,
     getMyStats,
     getGroupProblems,
-    submitGroupSolve
+    submitGroupSolve,
+    getGlobalContests,
+    registerForContest
 } = require('../controllers/studentController');
 const { protect, authorize } = require('../middleware/auth');
 
@@ -32,5 +34,7 @@ router.put('/mark-solved/:problemStatusId', markProblemSolved);
 router.get('/my-stats', getMyStats);
 router.get('/group-problems', getGroupProblems);
 router.post('/submit-solve/:problemId', submitGroupSolve);
+router.get('/global-contests', getGlobalContests);
+router.post('/register-contest/:contestId', registerForContest);
 
 module.exports = router;

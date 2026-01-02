@@ -465,11 +465,68 @@ const getGroupStats = async (req, res) => {
     }
 };
 
+/**
+ * @desc    Create a global contest for all students
+ * @route   POST /api/mentor/create-global-contest
+ * @access  Private (Mentor only)
+ */
+const createGlobalContest = async (req, res) => {
+    const { title, description, startTime, endTime, problems } = req.body;
+
+    try {
+        if (!title || !startTime || !endTime || !problems || !Array.isArray(problems)) {
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+
+        const contest = await Contest.create({
+            contestName: title,
+            description,
+            startTime: new Date(startTime),
+            endTime: new Date(endTime),
+            mentorId: req.user._id,
+            problems: problems.map((p, index) => ({
+                order: String.fromCharCode(65 + index), // A, B, C...
+                title: p.title,
+                link: p.link,
+                platform: p.platform
+            })),
+            isGlobal: true,
+            registeredStudents: []
+        });
+
+        res.status(201).json(contest);
+    } catch (error) {
+        console.error('Create global contest error:', error.message);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+/**
+ * @desc    Get all global contests
+ * @route   GET /api/mentor/global-contests
+ * @access  Private (Mentor only)
+ */
+const getGlobalContests = async (req, res) => {
+    try {
+        const contests = await Contest.find({ isGlobal: true })
+            .populate('mentorId', 'name email')
+            .populate('registeredStudents', '_id')
+            .sort({ createdAt: -1 });
+        
+        res.status(200).json({ contests });
+    } catch (error) {
+        console.error('Get global contests error:', error.message);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 module.exports = {
     createGroup,
     getMyGroups,
     addStudentsToGroup,
     createContest,
+    createGlobalContest,
+    getGlobalContests,
     viewStudentProgress,
     addGroupProblem,
     getGroupStats,

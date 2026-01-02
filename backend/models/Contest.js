@@ -6,6 +6,16 @@ const contestSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+    description: {
+        type: String,
+        default: ''
+    },
+    startTime: {
+        type: Date
+    },
+    endTime: {
+        type: Date
+    },
     mentorId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -13,7 +23,17 @@ const contestSchema = new mongoose.Schema({
     },
     problems: [{
         order: String,
-        link: String
+        title: String,
+        link: String,
+        platform: String
+    }],
+    isGlobal: {
+        type: Boolean,
+        default: false
+    },
+    registeredStudents: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     }]
 }, { timestamps: true });
 

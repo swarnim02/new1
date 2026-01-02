@@ -23,10 +23,14 @@ const StudentDashboard = () => {
     const [selectedSet, setSelectedSet] = useState(null);
     const [solveModal, setSolveModal] = useState({ show: false, problem: null, timeTaken: '<20min', learnings: '' });
     const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const [globalContests, setGlobalContests] = useState([]);
+    const [selectedContest, setSelectedContest] = useState(null);
+    const [contestTab, setContestTab] = useState('upcoming');
 
     useEffect(() => {
         fetchData();
         fetchGroupProblems();
+        fetchGlobalContests();
     }, []);
 
     const fetchData = async () => {
@@ -53,6 +57,25 @@ const StudentDashboard = () => {
             setStudentGroups(res.data.groups || []);
         } catch (error) {
             console.error('Error fetching group problems:', error);
+        }
+    };
+
+    const fetchGlobalContests = async () => {
+        try {
+            const res = await studentAPI.getGlobalContests();
+            setGlobalContests(res.data.contests || []);
+        } catch (error) {
+            console.error('Error fetching contests:', error);
+        }
+    };
+
+    const handleRegisterContest = async (contestId) => {
+        try {
+            await studentAPI.registerForContest(contestId);
+            alert('Successfully registered for contest!');
+            fetchGlobalContests();
+        } catch (error) {
+            alert(error.response?.data?.message || 'Error registering for contest');
         }
     };
 
@@ -168,7 +191,7 @@ const StudentDashboard = () => {
             <div className="dashboard-content">
                 <aside className="sidebar" style={{ background: 'rgba(0, 0, 0, 0.4)', borderRight: '1px solid rgba(255, 255, 255, 0.2)' }}>
                     <button
-                        onClick={() => setActiveTab('queue')}
+                        onClick={() => { setActiveTab('queue'); setSelectedContest(null); }}
                         style={{
                             background: activeTab === 'queue' ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
                             borderLeft: activeTab === 'queue' ? '3px solid white' : '3px solid transparent',
@@ -198,7 +221,7 @@ const StudentDashboard = () => {
                         Upsolve Queue
                     </button>
                     <button
-                        onClick={() => setActiveTab('groups')}
+                        onClick={() => { setActiveTab('groups'); setSelectedContest(null); }}
                         style={{
                             background: activeTab === 'groups' ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
                             borderLeft: activeTab === 'groups' ? '3px solid white' : '3px solid transparent',
@@ -226,6 +249,36 @@ const StudentDashboard = () => {
                         }}
                     >
                         Groups
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('contests')}
+                        style={{
+                            background: activeTab === 'contests' ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
+                            borderLeft: activeTab === 'contests' ? '3px solid white' : '3px solid transparent',
+                            color: activeTab === 'contests' ? 'white' : '#aaa',
+                            padding: '1rem 1.5rem',
+                            textAlign: 'left',
+                            border: 'none',
+                            cursor: 'pointer',
+                            width: '100%',
+                            transition: 'all 0.3s ease',
+                            fontSize: '1rem',
+                            fontWeight: activeTab === 'contests' ? 'bold' : 'normal'
+                        }}
+                        onMouseEnter={(e) => {
+                            if (activeTab !== 'contests') {
+                                e.target.style.background = 'rgba(255, 255, 255, 0.08)';
+                                e.target.style.color = 'white';
+                            }
+                        }}
+                        onMouseLeave={(e) => {
+                            if (activeTab !== 'contests') {
+                                e.target.style.background = 'transparent';
+                                e.target.style.color = '#aaa';
+                            }
+                        }}
+                    >
+                        Contests
                     </button>
                 </aside>
 
@@ -465,6 +518,147 @@ const StudentDashboard = () => {
                                             </div>
                                         </div>
                                     )}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === 'contests' && (
+                        <div>
+                            {!selectedContest ? (
+                                <div>
+                                    <h2 style={{ color: 'white', marginBottom: '20px' }}>Contests</h2>
+                                    <div style={{ display: 'flex', gap: '1rem', marginBottom: '20px' }}>
+                                        {['upcoming', 'current', 'past'].map(tab => (
+                                            <button
+                                                key={tab}
+                                                onClick={() => setContestTab(tab)}
+                                                style={{
+                                                    background: contestTab === tab ? 'white' : 'rgba(255, 255, 255, 0.1)',
+                                                    color: contestTab === tab ? '#000' : 'white',
+                                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                                    padding: '0.5rem 1rem',
+                                                    borderRadius: '6px',
+                                                    cursor: 'pointer',
+                                                    textTransform: 'capitalize',
+                                                    fontWeight: contestTab === tab ? 'bold' : 'normal'
+                                                }}
+                                            >
+                                                {tab}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    {globalContests.filter(contest => {
+                                        const now = new Date();
+                                        const start = new Date(contest.startTime);
+                                        const end = new Date(contest.endTime);
+                                        if (contestTab === 'upcoming') return start > now;
+                                        if (contestTab === 'current') return start <= now && end >= now;
+                                        if (contestTab === 'past') return end < now;
+                                        return false;
+                                    }).length === 0 ? (
+                                        <div className="empty-state" style={{ textAlign: 'center', padding: '40px', background: 'rgba(255,255,255,0.02)', borderRadius: '15px' }}>
+                                            <h3 style={{ color: '#aaa' }}>No {contestTab} contests</h3>
+                                            <p style={{ color: '#666' }}>Check back later for new contests.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="contests-list">
+                                            {globalContests.filter(contest => {
+                                                const now = new Date();
+                                                const start = new Date(contest.startTime);
+                                                const end = new Date(contest.endTime);
+                                                if (contestTab === 'upcoming') return start > now;
+                                                if (contestTab === 'current') return start <= now && end >= now;
+                                                if (contestTab === 'past') return end < now;
+                                                return false;
+                                            }).map(contest => (
+                                                <div key={contest._id} className="queue-item" style={{ borderLeft: '4px solid white', marginBottom: '1rem' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                        <div style={{ flex: 1 }}>
+                                                            <h3 style={{ margin: 0, color: 'white' }}>{contest.title}</h3>
+                                                            <p style={{ margin: '0.5rem 0', color: '#aaa' }}>{contest.description}</p>
+                                                            <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem', fontSize: '0.9rem', color: '#666' }}>
+                                                                <span>Start: {new Date(contest.startTime).toLocaleString()}</span>
+                                                                <span>End: {new Date(contest.endTime).toLocaleString()}</span>
+                                                                <span>{contest.problems.length} problems</span>
+                                                            </div>
+                                                        </div>
+                                                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                                            <button 
+                                                                className="btn btn-primary btn-sm"
+                                                                onClick={() => setSelectedContest(contest)}
+                                                            >
+                                                                View
+                                                            </button>
+                                                            {contestTab === 'upcoming' && (
+                                                                <button 
+                                                                    className="btn btn-secondary btn-sm"
+                                                                    onClick={() => handleRegisterContest(contest._id)}
+                                                                    disabled={contest.registeredStudents?.some(student => student._id === user._id)}
+                                                                >
+                                                                    {contest.registeredStudents?.some(student => student._id === user._id) ? 'Registered' : 'Register'}
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div>
+                                    <button 
+                                        className="btn btn-secondary btn-sm" 
+                                        onClick={() => setSelectedContest(null)}
+                                        style={{ marginBottom: '1rem' }}
+                                    >
+                                        Back to Contests
+                                    </button>
+                                    <h2 style={{ color: 'white', marginBottom: '1rem' }}>{selectedContest.title}</h2>
+                                    <p style={{ color: '#aaa', marginBottom: '1rem' }}>{selectedContest.description}</p>
+                                    <div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem', fontSize: '0.9rem', color: '#666' }}>
+                                        <span>Start: {new Date(selectedContest.startTime).toLocaleString()}</span>
+                                        <span>End: {new Date(selectedContest.endTime).toLocaleString()}</span>
+                                    </div>
+                                    
+                                    <h3 style={{ color: 'white', marginBottom: '1rem' }}>Problems</h3>
+                                    <div style={{ 
+                                        background: 'rgba(255, 255, 255, 0.1)',
+                                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                                        borderRadius: '8px',
+                                        backdropFilter: 'blur(10px)',
+                                        overflow: 'hidden'
+                                    }}>
+                                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                            <thead>
+                                                <tr style={{ background: 'rgba(0, 0, 0, 0.3)' }}>
+                                                    <th style={{ padding: '1rem', textAlign: 'left', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Order</th>
+                                                    <th style={{ padding: '1rem', textAlign: 'left', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Title</th>
+                                                    <th style={{ padding: '1rem', textAlign: 'center', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Platform</th>
+                                                    <th style={{ padding: '1rem', textAlign: 'center', color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {selectedContest.problems.map((problem, index) => (
+                                                    <tr key={problem._id} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                                                        <td style={{ padding: '1rem', color: 'white', fontWeight: 'bold' }}>{index + 1}</td>
+                                                        <td style={{ padding: '1rem', color: 'white' }}>{problem.title}</td>
+                                                        <td style={{ padding: '1rem', textAlign: 'center', color: '#e67e22', fontWeight: 'bold' }}>{problem.platform}</td>
+                                                        <td style={{ padding: '1rem', textAlign: 'center' }}>
+                                                            {new Date(selectedContest.startTime) <= new Date() && new Date(selectedContest.endTime) >= new Date() ? (
+                                                                <a href={problem.link} target="_blank" rel="noopener noreferrer" className="btn btn-secondary btn-sm">
+                                                                    Open Problem
+                                                                </a>
+                                                            ) : (
+                                                                <span style={{ color: '#666', fontSize: '0.9rem' }}>Not available</span>
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             )}
                         </div>

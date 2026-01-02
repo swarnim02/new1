@@ -907,6 +907,55 @@ const submitGroupSolve = async (req, res) => {
     }
 };
 
+/**
+ * @desc    Get all global contests
+ * @route   GET /api/student/global-contests
+ * @access  Private (Student only)
+ */
+const getGlobalContests = async (req, res) => {
+    try {
+        const contests = await Contest.find({ isGlobal: true })
+            .populate('registeredStudents', '_id')
+            .sort({ createdAt: -1 });
+        res.status(200).json({ contests });
+    } catch (error) {
+        console.error('Get global contests error:', error.message);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+/**
+ * @desc    Register for a global contest
+ * @route   POST /api/student/register-contest/:contestId
+ * @access  Private (Student only)
+ */
+const registerForContest = async (req, res) => {
+    try {
+        const { contestId } = req.params;
+        const contest = await Contest.findById(contestId);
+        
+        if (!contest || !contest.isGlobal) {
+            return res.status(404).json({ message: 'Contest not found' });
+        }
+
+        if (!contest.registeredStudents) {
+            contest.registeredStudents = [];
+        }
+
+        if (contest.registeredStudents.includes(req.user._id)) {
+            return res.status(400).json({ message: 'Already registered for this contest' });
+        }
+
+        contest.registeredStudents.push(req.user._id);
+        await contest.save();
+
+        res.status(200).json({ message: 'Successfully registered for contest' });
+    } catch (error) {
+        console.error('Register contest error:', error.message);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 module.exports = {
     getParticipatedContests,
     getMyContests,
@@ -919,6 +968,8 @@ module.exports = {
     verifyQueue,
     getMyStats,
     getGroupProblems,
-    submitGroupSolve
+    submitGroupSolve,
+    getGlobalContests,
+    registerForContest
 };
 
