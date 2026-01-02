@@ -593,36 +593,6 @@ const MentorDashboard = () => {
                                 >
                                     ← Back to Main
                                 </button>
-                                {!selectedContest && (
-                                    <>
-                                        <button 
-                                            className="btn btn-primary" 
-                                            onClick={() => setShowCreateContest(true)}
-                                            style={{ marginLeft: '1rem' }}
-                                        >
-                                            Create Contest
-                                        </button>
-                                        {editingContest && (
-                                            <button 
-                                                className="btn btn-secondary" 
-                                                onClick={() => {
-                                                    setEditingContest(null);
-                                                    setShowCreateContest(false);
-                                                    setContestForm({
-                                                        title: '',
-                                                        description: '',
-                                                        startTime: '',
-                                                        endTime: '',
-                                                        problems: [{ title: '', link: '', platform: 'Codeforces' }]
-                                                    });
-                                                }}
-                                                style={{ marginLeft: '1rem' }}
-                                            >
-                                                Cancel Edit
-                                            </button>
-                                        )}
-                                    </>
-                                )}
                             </div>
 
                             {selectedContest ? (
